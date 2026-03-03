@@ -1,10 +1,10 @@
 -- Isaiah Pridie
 -- CprE 381 project01 Fetcher component thing
+    -- This file contains:
+        -- PC Register
+        -- PC Register Update Logic
+        -- All the necessary ports for clocks, resets, controls, and I/O
 -- Start Date: 3.2.2026,    5:43 PM
-
--- TODO:     
-    -- Debug
-    -- Testbench
 
 library IEEE;
 use IEEE.std_logic_1164.all;
