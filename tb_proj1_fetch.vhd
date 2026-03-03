@@ -99,33 +99,43 @@ architecture structural of tb_proj1_fetch is
         -- Expected: o_PC = 0x0040.0000
 
 
-
         ----------------------------
         ------ TEST CASE 2.0: ------
           -- Test +4 and +imm adders with loop
           -- Should be starting from a reset PC register
-        i_imm       <= x"00000100"; -- Initialize the i_imm vector with a value
+        i_imm       <= x"00001000"; -- Initialize the i_imm
         
-        for k in 0 to 10 loop
+        for k in 0 to 15 loop       -- Loop 16 times
 
             if (k mod 2) = 0 then   -- if even, add 4
                 c_PC_add    <= '0';
-            else 
-                i_imm       ;   -- add 0x100 to the PC register every odd iteration
-
+            else                    -- else, i_imm += 0x1000;
+                i_imm       <= std_logic_vector(unsigned(i_imm) + x"00001000"); 
+                c_PC_add    <= '1';
             end if;
 
             wait until rising_edge(is_clk);
         end loop;
         -- Expected: 
-            --
-            --
-            --
-            --
+            -- (0)  o_PC = 0x0040.0004   | (1)   o_PC = 0x0040.1004
+            -- (2)  o_PC = 0x0040.1008   | (3)   o_PC = 0x0040.2008
+            -- (4)  o_PC = 0x0040.200C   | (5)   o_PC = 0x0040.300C
+            -- (6)  o_PC = 0x0040.3010   | (7)   o_PC = 0x0040.4010
+            -- (8)  o_PC = 0x0040.4014   | (9)   o_PC = 0x0040.5014
+            -- (10) o_PC = 0x0040.5018   | (11)  o_PC = 0x0040.6018
+            -- (12) o_PC = 0x0040.601C   | (13)  o_PC = 0x0040.701C
+            -- (14) o_PC = 0x0040.7020   | (15)  o_PC = 0x0040.8020
+            -- (16) o_PC = 0x0040.8024   |
+
+
         ----------------------------
         ------ TEST CASE 3.0: ------
-
-
-
+          -- Reset PC register one last time
+        is_RST_PC   <= '1';         -- Reset signal ON
+        c_PC_add    <= '0';         -- Default value
+        i_imm       <= x"00000000"; -- Default value
+        wait until rising_edge(is_clk);
+        -- Exepcted: o_PC = 0x0040.0000
+        
     end process;
 end architecture;
