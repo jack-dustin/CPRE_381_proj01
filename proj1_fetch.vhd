@@ -29,7 +29,7 @@ architecture structural of proj1_fetch is
     signal s_PC_imm_mux   : std_logic_vector(31 downto 0);    -- Signal carries "PC + imm" result to busMux(1)
 
     component basic_adder_n is 
-        generic (N: natural := 4);      -- Defined 4 by default in basic_adder_n folder
+        generic (N: integer := 4);      -- Defined 4 by default in basic_adder_n folder
         port(i_aB0   : in std_logic_vector(N-1 downto 0);   -- Data in 0
              i_aB1   : in std_logic_vector(N-1 downto 0);   -- Data in 1
              o_S     : out std_logic_vector(N-1 downto 0);  -- Output Sum
@@ -37,7 +37,7 @@ architecture structural of proj1_fetch is
              o_C     : out std_logic ); -- Not Bus. Final Carry Output)
     end component;
 
-    component busMux2t1 is
+    component busMux_2t1 is
         port(i_dZero    : in std_logic_vector(31 downto 0); 
              i_dOne     : in std_logic_vector(31 downto 0);
              ALUSrc     : in std_logic; -- select line
@@ -45,7 +45,7 @@ architecture structural of proj1_fetch is
     end component;
 
     component reg_n is
-        generic (N : natural := 32);
+        generic (N : integer := 32);
         port(i_CLK   : in std_logic;                          -- Clock input
              i_RST   : in std_logic;                          -- Reset input
              i_WE    : in std_logic;                          -- Write enable input
@@ -59,13 +59,13 @@ architecture structural of proj1_fetch is
     begin   
 
         -- Choose between "PC + 4" and "PC + imm"
-        INST_BUSMUX_1: busMux2t1
+        INST_BUSMUX_1: busMux_2t1
         port map(i_dZero    => s_PC_4_mux,        -- Input 0
                  i_dOne     => s_PC_imm_mux,      -- Input 1
                  ALUSrc     => c_PC_add,          -- Control/Select line
                  o_dOUT     => os_busMux1);       -- Going to PC Register
 
-        INST_BUSMUX_2: busMux2t1
+        INST_BUSMUX_2: busMux_2t1
         port map(i_dZero    => os_busMux1,      -- Default value through (busMux_1 output)
                  i_dOne     => x"00400000",     -- Reset PC Register to default value
                  ALUSrc     => i_RST_PC,        -- Reset signal/select line for PC register

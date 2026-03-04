@@ -31,7 +31,7 @@ architecture structural of tb_proj1_fetch is
     end component;
 
     begin
-    DUT: tb_proj1_fetch
+    DUT: proj1_fetch
         -- Component Port => Signal
         port map(i_CLK      => is_CLK,
                  i_RST_PC   => is_RST_PC,
@@ -48,53 +48,41 @@ architecture structural of tb_proj1_fetch is
     end process;
 
     TEST_CASES: process
+    begin
 
         ----------------------------
         ------ TEST CASE 1.0: ------
           -- Reset PC register
         is_RST_PC   <= '1'; -- Turn reset signal ON
         cs_PC_add   <= '0'; -- Set to a default value - Prevent unexepected behavior when RST goes low
-        i_imm       <= x"00000000";     -- Same reason as above
+        is_imm      <= x"00000000";     -- Same reason as above
         wait until rising_edge(is_clk);
-
-        -- Turn reset signal OFF and wait for it to be off before trying anything else.
-        is_RST_PC   <= '0'
-        wait until rising_edge(is_clk);
-        -- Expected: o_PC = 0x0040.0000
-
-
-        ------ TEST CASE 1.1: ------
-          -- Set PC Register to 0
-        is_RST_PC   <= '0';
-        c_PC_add    <= '1'  -- Set to loading from immediate
-        i_imm       <= x"00000000"; -- Set to all 0
-        wait until rising_edge(is_clk);
-        -- Expected: o_PC = 0x0000.0000
 
         
-        ------ TEST CASE 1.2: ------
+        ------ TEST CASE 1.1: ------
           -- Set PC register to all 1
-        is_RST_PC   <= '0';
-        c_PC_add    <= '1'  -- Set to loading from immediate
-        i_imm       <= x"FFFFFFFF"; -- Set to all 0
+        is_RST_PC   <= '0';   -- Make sure reset signal goes low
+        cs_PC_add   <= '1';  -- Set to adding immediate
+        -- What + 0x0040.0000 = 0xFFFF.FFFF -> 0xFFBF.FFFF
+        is_imm      <= x"FFBFFFFF"; -- Set to all 1
         wait until rising_edge(is_clk);
         -- Expected: o_PC = 0xFFFF.FFFF
 
 
-        ------ TEST CASE 1.3: ------
+        ------ TEST CASE 1.2: ------
           -- Add 1 to PC register of all F's
         is_RST_PC   <= '0';
-        c_PC_add    <= '1'  -- Set to loading from immediate
-        i_imm       <= x"00000001"; -- Set to 0x1
+        cs_PC_add   <= '1';  -- Set to adding immediate
+        is_imm      <= x"00000001"; -- Set to 0x1
         wait until rising_edge(is_clk);
         -- Expected: o_PC = 0x0000.0000
 
 
-        ------ TEST CASE 1.4: ------
+        ------ TEST CASE 1.3: ------
           -- Reset PC register with is_RST_PC
         is_RST_PC   <= '1';
-        c_PC_add    <= '0'          -- Set to default of "+ 4"
-        i_imm       <= x"00000000"; -- Set to default
+        cs_PC_add   <= '0';         -- Set to default of "+ 4"
+        is_imm      <= x"00000000"; -- Set to default
         wait until rising_edge(is_clk);
         -- Expected: o_PC = 0x0040.0000
 
@@ -103,15 +91,15 @@ architecture structural of tb_proj1_fetch is
         ------ TEST CASE 2.0: ------
           -- Test +4 and +imm adders with loop
           -- Should be starting from a reset PC register
-        i_imm       <= x"00001000"; -- Initialize the i_imm
+          is_RST_PC <= '0';         -- Turn Reset OFF
+        is_imm      <= x"00001000"; -- Initialize the i_imm
         
         for k in 0 to 15 loop       -- Loop 16 times
 
             if (k mod 2) = 0 then   -- if even, add 4
-                c_PC_add    <= '0';
-            else                    -- else, i_imm += 0x1000;
-                i_imm       <= std_logic_vector(unsigned(i_imm) + x"00001000"); 
-                c_PC_add    <= '1';
+                cs_PC_add    <= '0';
+            else                    -- else, add is_imm
+                cs_PC_add   <= '1';
             end if;
 
             wait until rising_edge(is_clk);
@@ -125,17 +113,17 @@ architecture structural of tb_proj1_fetch is
             -- (10) o_PC = 0x0040.5018   | (11)  o_PC = 0x0040.6018
             -- (12) o_PC = 0x0040.601C   | (13)  o_PC = 0x0040.701C
             -- (14) o_PC = 0x0040.7020   | (15)  o_PC = 0x0040.8020
-            -- (16) o_PC = 0x0040.8024   |
 
 
         ----------------------------
         ------ TEST CASE 3.0: ------
           -- Reset PC register one last time
         is_RST_PC   <= '1';         -- Reset signal ON
-        c_PC_add    <= '0';         -- Default value
-        i_imm       <= x"00000000"; -- Default value
+        cs_PC_add   <= '0';         -- Default value
+        is_imm      <= x"00000000"; -- Default value
         wait until rising_edge(is_clk);
         -- Exepcted: o_PC = 0x0040.0000
         
+        wait;
     end process;
 end architecture;
