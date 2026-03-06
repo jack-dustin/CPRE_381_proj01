@@ -15,19 +15,9 @@ end extenders;
 architecture dataflow of extenders is
 begin
 
-    CONCATENATION: process(i_imm, i_ZoS)
-    begin
-        -- Using if statments instead of a mux because me thinks it is easier/faster to code
-        -- Extends by concatenating a string of bits to the MS side of the input vector (i_imm)
-        if i_ZoS = '1' then             -- If Sign extending
-            if i_imm(11) = '1' then     -- Sign extend with 1s
-                o_out   <= x"FFFFF" & i_imm(11 downto 0);   -- assign all '1's at top. xFFFFF = All ones for 20 bits
-            else 
-                o_out   <= x"00000" & i_imm(11 downto 0);   -- assign all '0's at top. x00000 = All zeros for 20 bits
-            end if;
-        else            -- if Zero extending
-            o_out   <= x"00000" & i_imm(11 downto 0);       -- Zero exntending with 20 bits of Zero at beginning
-        end if;
+    with i_ZoS select
+    o_out   <=  x"FFFFF" & i_imm(11 downto 0) when '1',
+                x"00000" & i_imm(11 downto 0) when '0';
+                -- No others. Only two options for this mux (1, 0)
 
-    end process;
-end architecture;
+end dataflow;
