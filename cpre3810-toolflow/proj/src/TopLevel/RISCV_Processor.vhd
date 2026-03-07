@@ -72,6 +72,91 @@ architecture structure of RISCV_Processor is
   -- TODO: You may add any additional signals or components your implementation 
   --       requires below this comment
 
+  component proj1_fetch is
+    generic(ADDR_WIDTH : integer;
+            DATA_WIDTH : integer);
+    port(i_CLK      : in std_logic;
+         i_RST_PC   : in std_logic;     -- Need different reset* (this one); We need to reset register to 0x0040.0000 not 0x0000.0000
+         i_imm      : in std_logic_vector((DATA_WIDTH - 1) downto 0);     -- imm AFTER SIGN-EXTENDING AND MUXING
+         c_PC_add   : in std_logic;                         -- Control bit for choosing between "+4" and "+imm"
+         o_PC       : out std_logic_vector((DATA_WIDTH - 1) downto 0) );  -- Output from PC register to Instruction memory)
+  end component;
+
+  component ctrl_decoder is
+    generic(ADDR_WIDTH : integer;
+            DATA_WIDTH : integer);
+    port(
+          instr     : in  std_logic_vector((DATA_WIDTH - 1) downto 0);
+
+          reg_we    : out std_logic;
+          alu_src   : out std_logic;   -- 0=rs2, 1=imm
+          mem_we    : out std_logic;
+          mem_re    : out std_logic;
+          wb_sel    : out wb_sel_t; 
+
+          is_branch : out std_logic;
+          is_jal    : out std_logic;
+          is_jalr   : out std_logic;
+
+          alu_op    : out alu_op_t;
+          mem_sign  : out std_logic   -- for loads: 1=signed, 0=unsigned
+        
+  );
+  end component;
+
+  component reg_file is
+    generic(ADDR_WIDTH : integer;
+            DATA_WIDTH : integer);
+    port(
+          i_RS1   : in std_logic_vector((ADDR_WIDTH - 1) downto 0);   -- 5 bit bus    -- [19:15]
+          i_RS2   : in std_logic_vector((ADDR_WIDTH - 1) downto 0);   -- 5 bit bus    -- [24:20]
+          o_rs1   : out std_logic_vector((DATA_WIDTH - 1) downto 0);    -- Result of RS1 input
+          o_rs2   : out std_logic_vector((DATA_WIDTH - 1) downto 0);    -- Result of RS2 input
+          i_rd    : in std_logic_vector((ADDR_WIDTH - 1) downto 0);   -- 5 but bus    -- [11:7]
+          i_dEN   : in std_logic;     -- Decoder EN bit
+          i_RST   : in std_logic;     -- RESET bit
+          i_CLK   : in std_logic;     -- Clock Signal for register
+          i_DATA  : in std_logic_vector((DATA_WIDTH - 1) downto 0));  -- 32 bit bus   -- Register Data Input
+  end component;
+
+  component extenders is 
+    generic(DATA_WIDTH : integer);
+    port(
+         i_imm  : in std_logic_vector(11 downto 0);    -- input 12 bit immediate value
+         i_ZoS  : in std_logic;                        -- Bit to choose between 
+         o_out  : out std_logic_vector((DATA_WIDTH - 1) downto 0));   -- Output (32-bit) vector
+  end component;
+
+  component addSub is
+    generic(DATA_WIDTH : integer);
+    port (  i_Da        :   in std_logic_vector(DATA_WIDTH-1 downto 0);
+            i_Db        :   in std_logic_vector(DATA_WIDTH-1 downto 0);
+            nAdd_Sub    :   in std_logic;   -- used as control/carry
+            o_Sum       :   out std_logic_vector(DATA_WIDTH-1 downto 0);
+            o_Car       :   out std_logic);  -- used for last carry output
+  end component;
+
+  component MySecondDataPath is
+    generic(ADDR_WIDTH : integer;
+            DATA_WIDTH : integer);
+     port(nAddSub    : in std_logic;     -- Control bit for Adder/Subtractor
+             i_CLK      : in std_logic;         -- Clock (obviously)
+             i_RST      : in std_logic;         -- Reset (obivously)
+             i_rs1      : in std_logic_vector((ADDR_WIDTH - 1) downto 0);
+             i_rs2      : in std_logic_vector((ADDR_WIDTH - 1) downto 0);
+             i_rd       : in std_logic_vector((ADDR_WIDTH - 1) downto 0);
+             i_imm      : in std_logic_vector((DATA_WIDTH - 1) downto 0); -- Need for immediate value. Here we will run it through the extender
+             i_ALUSrc   : in std_logic;         -- Controls using rs2 OR imm
+             i_memOut   : in std_logic_vector((DATA_WIDTH - 1) downto 0); -- input to mux from memory
+             mem_o_alu  : in std_logic;     -- select for choosing adder or memory output to load into register(s)
+             regWrite   : in std_logic;         -- i_dEN : Decoder Enable
+         
+             o_Data     : out std_logic_vector((DATA_WIDTH - 1) downto 0);    -- Used to show output of bus mux
+             o_rs1      : out std_logic_vector((DATA_WIDTH - 1) downto 0);
+             o_rs2      : out std_logic_vector((DATA_WIDTH - 1) downto 0);
+             o_alu      : out std_logic_vector((DATA_WIDTH - 1) downto 0) );
+  end component;
+
 begin
   s_Ovfl <= '0'; -- RISC-V does not have hardware overflow detection.
   -- TODO: This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
@@ -102,5 +187,81 @@ begin
 
   -- TODO: Implement the rest of your processor below this comment! 
 
+  IFetch: proj1_fetch
+    generic map(ADDR_WIDTH => ADDR_WIDTH,
+                DATA_WIDTH => N)
+    port map(
+              i_CLK   
+              i_RST_PC
+              i_imm   
+              c_PC_add
+              o_PC  
+             );
+  CDec: ctrl_decoder
+    generic map(ADDR_WIDTH => ADDR_WIDTH,
+                DATA_WIDTH => N)
+    port map(
+              instr    
+              reg_we   
+              alu_src  
+              mem_we   
+              mem_re   
+              wb_sel   
+              is_branch
+              is_jal   
+              is_jalr  
+              alu_op   
+              mem_sign  
+             );
+  Rfile: reg_file
+    generic map(ADDR_WIDTH => ADDR_WIDTH,
+                DATA_WIDTH => N)
+    port map(
+              i_RS1 
+              i_RS2 
+              o_rs1 
+              o_rs2 
+              i_rd  
+              i_dEN 
+              i_RST 
+              i_CLK 
+              i_DATA
+             );
+  Ext: extenders
+    generic map(ADDR_WIDTH => ADDR_WIDTH,
+                DATA_WIDTH => N)
+    port map(
+              i_imm
+              i_ZoS
+              o_out
+             );
+  LAddsub: addSub
+    generic map(ADDR_WIDTH => ADDR_WIDTH,
+                DATA_WIDTH => N)
+    port map(
+              i_Da    
+              i_Db    
+              nAdd_Sub
+              o_Sum   
+              o_Car   
+             );
+  DataP: MySecondDataPath
+    generic map(ADDR_WIDTH => ADDR_WIDTH,
+                DATA_WIDTH => N)
+    port map(
+              i_CLK    
+              i_RST    
+              i_rs1    
+              i_rs2    
+              i_rd     
+              i_imm    
+              i_ALUSrc 
+              i_memOut 
+              mem_o_alu
+              regWrite 
+              o_Data   
+              o_rs1    
+              o_rs2    
+              o_alu    
+             );
 end structure;
-
