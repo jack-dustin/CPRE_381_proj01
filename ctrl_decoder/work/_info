@@ -1,0 +1,143 @@
+m255
+K4
+z2
+Z0 !s12c _opt
+Z1 !s99 nomlopt
+R0
+R1
+!s11e vcom 2025.1_2 2025.04, Apr  7 2025
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z2 dX:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder
+T_opt
+!s110 1772843007
+Vz_6A<@[2Q5nHc1]UV1zR91
+04 15 3 work tb_ctrl_decoder sim 1
+=1-005056b6623a-69ab6ffd-14c-2930
+R1
+!s12f OEM100
+!s12b OEM100
+!s124 OEM100
+!s135 nogc
+o-quiet -auto_acc_if_foreign -work work
+tCvgOpt 0 defaultOptions 1107178788
+n@_opt
+OL;O;2025.1_2;82
+Ectrl_decoder
+Z3 w1772842983
+Z4 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
+Z5 DPx4 work 8 rv32_pkg 0 22 0a0nMMc4EjkVk51Qi7`OY3
+Z6 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z7 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
+!i122 25
+R2
+Z8 8X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/ctrl_decoder.vhd
+Z9 FX:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/ctrl_decoder.vhd
+l0
+L161 1
+VD67Ae8n=BHoYUWh:W>0Tb2
+!s100 UEB5dmRB`LGYN1h;T9Xhd0
+Z10 OL;C;2025.1_2;82
+33
+Z11 !s110 1772842992
+!i10b 1
+Z12 !s108 1772842991.000000
+Z13 !s90 -reportprogress|300|-work|work|X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/ctrl_decoder.vhd|
+Z14 !s107 X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/ctrl_decoder.vhd|
+!i113 0
+Z15 o-work work
+Z16 tExplicit 1 NoCoverage 1 CvgOpt 0 defaultOptions 1082985408
+Adataflow
+R4
+R5
+R6
+R7
+Z17 DEx4 work 12 ctrl_decoder 0 22 D67Ae8n=BHoYUWh:W>0Tb2
+!i122 25
+l196
+L181 124
+V4>lUbG@KC56FzAdnP2gBg3
+!s100 hMdfQR7;LQDa5gXIWjLB21
+R10
+33
+R11
+!i10b 1
+R12
+R13
+R14
+!i113 0
+R15
+R16
+Prv32_pkg
+R4
+R6
+R7
+!i122 26
+w1772816121
+R2
+8X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/rv32_pkg.vhd
+FX:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/rv32_pkg.vhd
+l0
+L5 32
+V0a0nMMc4EjkVk51Qi7`OY3
+!s100 _j5?OzP^dORliU_]AVR7j0
+R10
+33
+R11
+!i10b 1
+Z18 !s108 1772842992.000000
+!s90 -reportprogress|30|-work|work|X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/rv32_pkg.vhd|
+!s107 X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/rv32_pkg.vhd|
+!i113 0
+R15
+R16
+Etb_ctrl_decoder
+Z19 w1772842888
+R5
+R4
+R6
+R7
+!i122 27
+R2
+Z20 8X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/tb_ctrl_decoder.vhd
+Z21 FX:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/tb_ctrl_decoder.vhd
+l0
+L6 1
+V6<oWCD`zW@S:BFBfHGnf:3
+!s100 dj@cVEFn00jN[B58;Fa6T1
+R10
+33
+R11
+!i10b 1
+R18
+Z22 !s90 -reportprogress|30|-work|work|X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/tb_ctrl_decoder.vhd|
+Z23 !s107 X:/CPRE_381_proj01/CPRE_381_proj01/ctrl_decoder/tb_ctrl_decoder.vhd|
+!i113 0
+R15
+R16
+Asim
+R17
+R5
+R4
+R6
+R7
+DEx4 work 15 tb_ctrl_decoder 0 22 6<oWCD`zW@S:BFBfHGnf:3
+!i122 27
+l167
+L9 346
+V9OT7`kTJ41Plg=H3`VNG@1
+!s100 DRiZgO4S5z[U`DYf<GPUF3
+R10
+33
+R11
+!i10b 1
+R18
+R22
+R23
+!i113 0
+R15
+R16

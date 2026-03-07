@@ -32,7 +32,5 @@ package rv32_pkg is
   -- Writeback select
   type wb_sel_t is (WB_ALU, WB_MEM, WB_PC4);
 
-  -- Load/store sizes
-  type mem_size_t is (MS_B, MS_H, MS_W);
 
 end package;
