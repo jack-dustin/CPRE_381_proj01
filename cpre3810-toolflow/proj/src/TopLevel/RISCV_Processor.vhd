@@ -191,11 +191,11 @@ begin
     generic map(ADDR_WIDTH => ADDR_WIDTH,
                 DATA_WIDTH => N)
     port map(
-              i_CLK   
-              i_RST_PC
-              i_imm   
-              c_PC_add
-              o_PC  
+              i_CLK     => iCLK,
+              i_RST_PC  => iRST,
+              i_imm     => -- sign extension immediate, signal from extender
+              c_PC_add  => -- control signal
+              o_PC      => 
              );
   CDec: ctrl_decoder
     generic map(ADDR_WIDTH => ADDR_WIDTH,
