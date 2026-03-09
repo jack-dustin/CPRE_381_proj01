@@ -143,7 +143,6 @@ architecture structural of shifter is
                  o_dOUT     => s_n1tout);
 
 
-
         -- Reverse Reverse bits back by Reversing to Unreversed
         -- IT'S STILL BEAUTIFUL!
         s_Frwd(0)    <= s_n1tout(31);

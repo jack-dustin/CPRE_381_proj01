@@ -7,16 +7,15 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 entity proj01_ALU is
-    generic(N : natrual := 32); -- Override all generics in this file with this value
     port(i_A        : in  std_logic_vector(31 downto 0);    -- RS1
          i_B        : in  std_logic_Vector(31 downto 0);    -- RS2 or IMM
          i_ALUctl   : in  std_logic_vector(3 downto 0);     -- All control signals we are supposed to need
             -- LeftMost bit of o_alu_op from Excel is (3)
-            -- i_ALUct1(3) = funct3(1)      -- Used for mux, 
-            -- i_ALUct1(2) = funct3(2)      -- Used for mux, Shift direction
-            -- i_ALUct1(1) = funct3(0)      -- Used for mux
-            -- i_ALUct1(0) = funct7(5)      -- Used for nAddSub, Shift s_sex
-         o_ALUout   : out std_logic_Vector(31 downto 0);
+            -- i_ALUctl(3) = funct3(1)      -- Used for mux, 
+            -- i_ALUctl(2) = funct3(2)      -- Used for mux, Shift direction
+            -- i_ALUctl(1) = funct3(0)      -- Used for mux
+            -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub, Shift s_sex
+         o_ALUout   : out std_logic_Vector(31 downto 0)
          -- Later:
             -- o_zero;
             -- o_lt;
@@ -114,20 +113,19 @@ begin
     INST_SHIFT: Shifter port map(
         i_vect_A    => i_A,
         i_vect_B    => i_B,
-        c_extend    => i_ALUct1(0),     -- funct7(5)    When 1 sign extend, else zero extend
-        c_Shift     => i_ALUct1(2),     -- funct3(2)    When 1 continue, else reverse bit order
+        c_extend    => i_ALUctl(0),     -- funct7(5)    When 1 sign extend, else zero extend
+        c_Shift     => i_ALUctl(2),     -- funct3(2)    When 1 continue, else reverse bit order
         o_vect_Out  => s_shiftOUT);
 
     -- Instantiate Add/Sub ALU functionality
     INST_ADDSUB: addSub port map(
         i_Da        => i_A,
         i_Db        => i_B,
-        nAdd_Sub    => i_ALUct1(0),     -- funct7(5)
+        nAdd_Sub    => i_ALUctl(0),     -- funct7(5)
         o_Sum       => s_AddSubOUT,     -- Sum is output vector
         o_Car       => open);           -- Carry is last carry bit. Leave open - We don't need it rn
-    
+     
 
-    -- Use busMux_4t1 and busMux_2t1 for busMux_5t1
     -- 2x [4t1 Mux]  ->  1x [2t1 mux]  ->  output
         -- Da0  000  Add/Sub
         -- Db0  001  Shift
@@ -139,34 +137,34 @@ begin
         -- Dd1  111  ANDn
 
     -- LeftMost bit of o_alu_op from Excel is (3)
-        -- i_ALUct1(3) = funct3(1)      -- Used for mux, 
-        -- i_ALUct1(2) = funct3(2)      -- Used for mux, Shift direction
-        -- i_ALUct1(1) = funct3(0)      -- Used for mux
-        -- i_ALUct1(0) = funct7(5)      -- Used for nAddSub, Shift s_sex
+        -- i_ALUctl(3) = funct3(1)      -- Used for mux, 
+        -- i_ALUctl(2) = funct3(2)      -- Used for mux, Shift direction
+        -- i_ALUctl(1) = funct3(0)      -- Used for mux
+        -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub, Shift s_ex
 
     -- Instantiate busMuxes
-    INST_BUSMUX_4t1_0: busMux_451 port map(
+    INST_BUSMUX_4t1_0: busMux_4t1 port map(
         i_Da    => s_AddSubOUT,     -- Input AddSub
         i_Db    => s_shiftOUT,      -- Input Left Shift
         i_Dc    => x"00000000",     -- Become slt later
         i_Dd    => s_shiftOUT,      -- (Become o_zero later?)
-        C_S0    => i_ALUct1(1),     -- funct3(0)
-        C_S1    => i_ALUct1(3),     -- funct3(1)
+        C_S0    => i_ALUctl(1),     -- funct3(0)
+        C_S1    => i_ALUctl(3),     -- funct3(1)
         o_Do    => s_Mux_0t2);      -- Go to port 0 of 2t1 mux
 
-    INST_BUSMUX_4t1_1: busMux_451 port map(
+    INST_BUSMUX_4t1_1: busMux_4t1 port map(
         i_Da    => s_xorOUT,        -- Input XOR
         i_Db    => s_shiftOUT,      -- Input Right Shift
         i_Dc    => s_orOUT,         -- Input OR
         i_Dd    => s_andOUT,        -- Input AND
-        C_S0    => i_ALUct1(1),     -- funct3(0)
-        C_S1    => i_ALUct1(3),     -- funct3(1)
+        C_S0    => i_ALUctl(1),     -- funct3(0)
+        C_S1    => i_ALUctl(3),     -- funct3(1)
         o_Do    => s_Mux_1t2);      -- Go to port 1 of 2t1 mux
 
     INST_BUSMUX_2t1_2: busMux_2t1 port map(
         i_dZero => s_Mux_0t2,       -- Mux4t1_0 input
         i_dOne  => s_Mux_1t2,       -- Mux4t1_1 input
-        ALUSrc  => i_ALUct1(2),     -- funct3(2)
+        ALUSrc  => i_ALUctl(2),     -- funct3(2)
         o_dOUT  => o_ALUout);       -- Final ALU Output
 
 end architecture;
