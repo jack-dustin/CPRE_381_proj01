@@ -48,7 +48,13 @@ architecture structural of shifter is
     end component;
 
     begin
-        s_ex       <= c_extend and c_Shift;     -- Check this logic later 
+        -- s_ex represents the bit used to sign/zero extend when shifting
+        -- Leaving very clear comments because I keep confusing myself with this part
+            -- Need to AND 3 arguments:
+            -- "Is this a logical or arithmetic shift?" --> c_extend
+            -- "Am I shifting right?" --> c_Shift
+            -- "Is the number being shifted actually negative?" --> i_vect_A(31) 
+        s_ex       <= c_extend and c_Shift and i_vect_A(31);     -- Check this logic later 
         s_numShift  <= i_vect_B(4 downto 0);    -- Now holding shift amount
 
         -- Reverse the order of the input

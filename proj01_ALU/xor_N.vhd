@@ -3,6 +3,10 @@
     -- Apparently I can't just generate 32 instancs of xor gates and hook a vector up to it. 
 -- 2.17.2026,   9:30 MM
 
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
 -- N-Bit xor
 entity xor_N is
     generic(N : natural := 32); -- Natural ~= Unsigned* Integer*

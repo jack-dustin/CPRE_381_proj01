@@ -14,13 +14,10 @@ architecture proj01_ALU of tb_proj01_ALU is
 
     -- Signals/Wires/Waveforms/Constants
     signal s_ALUctrl    : std_logic_vector(3 downto 0);     -- 4 bits   Reworked vector signal
-    signal s_funct3_2   : std_logic;  -- Bit 3/3
-    signal s_funct3_1   : std_logic;  -- Bit 2/3
-    signal s_funct3_0   : std_logic;  -- Bit 1/3
-    signal s_funct7_5   : std_logic;    -- 1 bit. Used for s_ex, ALU_mux, nAddSub
     signal s_iA         : std_logic_vector(31 downto 0);    -- input A (RS1)
     signal s_iB         : std_logic_vector(31 downto 0);    -- input B (RS2 || Imm)
     signal s_oOut       : std_logic_vector(31 downto 0);    -- Output of ALU
+    
     signal t_ALUctrl    : std_logic_vector(3 downto 0);     -- 4 bits
 
     component proj01_ALU is
@@ -33,22 +30,18 @@ architecture proj01_ALU of tb_proj01_ALU is
     begin
     DUT: proj01_ALU
         -- Component => Signal
-        port map(i_A        => s_iA,
-                i_B        => s_iB,
-                i_ALUctl   => t_ALUctrl,
-                o_ALUout   => s_oOut );
-
-        s_funct3_2  <= t_ALUctrl(2);
-        s_funct3_1  <= t_ALUctrl(3);
-        s_funct3_0  <= t_ALUctrl(1);
-        s_funct7_5  <= t_ALUctrl(0);
+        port map(i_A      => s_iA,
+                i_B       => s_iB,
+                i_ALUctl  => t_ALUctrl,
+                o_ALUout  => s_oOut );
         
+
         -- s_ALUctrl = [funct3_2, funct3_1, funct3_0, funct7_5]
             -- Going to make TestBenches a lot faster to make
-        s_ALUctrl(3)    <= t_ALUctrl(2);
-        s_ALUctrl(2)    <= t_ALUctrl(3);
-        s_ALUctrl(1)    <= t_ALUctrl(1);
-        s_ALUctrl(0)    <= t_ALUctrl(0);
+        t_ALUctrl(2)    <= s_ALUctrl(3);  
+        t_ALUctrl(3)    <= s_ALUctrl(2);  
+        t_ALUctrl(1)    <= s_ALUctrl(1);  
+        t_ALUctrl(0)    <= s_ALUctrl(0);  
 
     Test_Cases: process
     begin
@@ -116,7 +109,7 @@ architecture proj01_ALU of tb_proj01_ALU is
         wait for 5 ns;
         -- Expect: 0x0000 0000
 
-    wait for 20 ns;     -- Make it more obvious when the next test starts
+    wait for 10 ns;     -- Make it more obvious when the next test starts
 
         --------------------------------
         -------- XOR Unit --------------
@@ -162,7 +155,7 @@ architecture proj01_ALU of tb_proj01_ALU is
         wait for 5 ns;
         -- Expect: 0xFFFF FFFF
 
-    wait for 20 ns;     -- Make it more obvious when the next test starts
+    wait for 10 ns;     -- Make it more obvious when the next test starts
 
         --------------------------------
         -------- OR Unit ---------------
@@ -208,7 +201,7 @@ architecture proj01_ALU of tb_proj01_ALU is
         wait for 5 ns;
         -- Expect: 0xFFFF FFFF
 
-    wait for 20 ns;     -- Make it more obvious when the next test starts
+    wait for 10 ns;     -- Make it more obvious when the next test starts
 
         --------------------------------
         -------- Adder/Sub Unit --------
@@ -268,7 +261,7 @@ architecture proj01_ALU of tb_proj01_ALU is
         wait for 5 ns;
         -- Expect: 0x0000 0000
 
-    wait for 20 ns;     -- Make it more obvious when the next test starts
+    wait for 10 ns;     -- Make it more obvious when the next test starts
 
         --------------------------------
         -------- Shifter Unit ----------
@@ -314,7 +307,7 @@ architecture proj01_ALU of tb_proj01_ALU is
         wait for 5 ns;
         -- Expect: 0x3456 7800 
 
-    wait for 10 ns;     -- Make it more obvious when the next test starts
+    wait for 5 ns;     -- Make it more obvious when the next test starts
 
         -- Test Case 7: Shift Right xF0F0... by 4 bits (Zero Extend)
         s_ALUctrl   <= x"A";        -- 1010     Shift Right, Zero Extend
@@ -358,7 +351,7 @@ architecture proj01_ALU of tb_proj01_ALU is
         wait for 5 ns;
         -- Expect: 0x0000 0000   Shift should max at 31 bits
 
-    wait for 10 ns;     -- Make it more obvious when the next test starts
+    wait for 5 ns;     -- Make it more obvious when the next test starts
 
         -- Test Case 13: Shift Right xF0F0... by 4 bits (One Extend)
         s_ALUctrl   <= x"B";        -- 1011     Shift Right, One Extend

@@ -2,6 +2,10 @@
 -- CprE 3810 proj01 and_N gate file.
 -- 3.8.2026,   12:01 AM
 
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
 -- N-Bit AND
 entity and_N is
     generic(N : natural := 32); -- Natural ~= Unsigned* Integer*
