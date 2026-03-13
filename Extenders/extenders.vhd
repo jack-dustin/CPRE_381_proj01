@@ -16,8 +16,10 @@ architecture dataflow of extenders is
 begin
 
     with i_ZoS select
-    o_out   <=  x"FFFFF" & i_imm(11 downto 0) when '1',
-                x"00000" & i_imm(11 downto 0) when '0';
+    with i_ZoS select
+    o_out <= (31 downto 12 => '0') & i_imm when '0',
+           (31 downto 12 => i_imm(11)) & i_imm when '1',
+           (31 downto 12 => i_imm(11)) & i_imm when others;  -- default
                 -- No others. Only two options for this mux (1, 0)
 
 end dataflow;
