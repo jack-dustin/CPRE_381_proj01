@@ -17,7 +17,8 @@ begin
 
     with i_ZoS select
     o_out   <=  x"FFFFF" & i_imm(11 downto 0) when '1',
-                x"00000" & i_imm(11 downto 0) when '0';
+                x"00000" & i_imm(11 downto 0) when '0',
+                x"00000000" when others; 
                 -- No others. Only two options for this mux (1, 0)
 
 end dataflow;
