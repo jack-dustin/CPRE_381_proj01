@@ -395,6 +395,126 @@ architecture proj01_ALU of tb_proj01_ALU is
         wait for 5 ns;
         -- Expect: 0xFFFF FFFF   Shift should max at 31 bits
 
+    wait for 10 ns;     -- Make it more obvious when the next test starts
+
+        --------------------------------
+        -------- SLT Unit --------------
+        -- Test Case 1: 0 < 0 (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        s_iB        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 2: 0 < 1 (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        s_iB        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        wait for 5 ns;
+        -- Expect: 0x0000 0001
+
+        -- Test Case 3: 1 < 0 (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        s_iB        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 4: -1 < 1 (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
+        s_iB        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        wait for 5 ns;
+        -- Expect: 0x0000 0001
+
+        -- Test Case 5: 1 < -1 (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        s_iB        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 6: x80000000 < 0 (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"80000000"; -- 1000 0000 0000 0000 . . .
+        s_iB        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0001
+
+        -- Test Case 7: x7FFFFFFF < x80000000 (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"7FFFFFFF"; -- 0111 1111 1111 1111 . . .
+        s_iB        <= x"80000000"; -- 1000 0000 0000 0000 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 8: x80000000 < x7FFFFFFF (signed)
+        s_ALUctrl   <= x"4";        -- 0100     SLT
+        s_iA        <= x"80000000"; -- 1000 0000 0000 0000 . . .
+        s_iB        <= x"7FFFFFFF"; -- 0111 1111 1111 1111 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0001
+
+    wait for 5 ns;     -- Make it more obvious when the next test starts
+
+        --------------------------------
+        -------- SLTU Unit -------------
+        -- Test Case 1: 0 < 0 (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        s_iB        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 2: 0 < 1 (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        s_iB        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        wait for 5 ns;
+        -- Expect: 0x0000 0001
+
+        -- Test Case 3: 1 < 0 (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        s_iB        <= x"00000000"; -- 0000 0000 0000 0000 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 4: 1 < xFFFFFFFF (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        s_iB        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0001
+
+        -- Test Case 5: xFFFFFFFF < 1 (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
+        s_iB        <= x"00000001"; -- . . . 0000 0000 0000 0001
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 6: x7FFFFFFF < x80000000 (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"7FFFFFFF"; -- 0111 1111 1111 1111 . . .
+        s_iB        <= x"80000000"; -- 1000 0000 0000 0000 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0001
+
+        -- Test Case 7: x80000000 < x7FFFFFFF (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"80000000"; -- 1000 0000 0000 0000 . . .
+        s_iB        <= x"7FFFFFFF"; -- 0111 1111 1111 1111 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
+        -- Test Case 8: xFFFFFFFF < xFFFFFFFF (unsigned)
+        s_ALUctrl   <= x"6";        -- 0110     SLTU
+        s_iA        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
+        s_iB        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
+        wait for 5 ns;
+        -- Expect: 0x0000 0000
+
     wait;
     end process;
 end architecture;

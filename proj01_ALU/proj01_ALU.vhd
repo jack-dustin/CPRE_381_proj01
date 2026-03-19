@@ -14,13 +14,13 @@ entity proj01_ALU is
             -- i_ALUctl(3) = funct3(1)      -- Used for mux, 
             -- i_ALUctl(2) = funct3(2)      -- Used for mux, Shift direction
             -- i_ALUctl(1) = funct3(0)      -- Used for mux
-            -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub, Shift s_sex
+            -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub*, Shift s_sex
          o_ALUout   : out std_logic_Vector(31 downto 0)
          -- Later:
             -- o_zero;
             -- o_lt;
             );
-end proj01_ALU;
+end entity;
 
 architecture structural of proj01_ALU is
 
@@ -28,12 +28,38 @@ architecture structural of proj01_ALU is
     signal s_andOUT     : std_logic_vector(31 downto 0);
     signal s_xorOUT     : std_logic_vector(31 downto 0);
     signal s_orOUT      : std_logic_vector(31 downto 0);
-    signal s_shiftOUT   : std_logic_vector(31 downto 0);
+    signal s_shiftOUT   : std_logic_vector(31 downto 0);    -- Used for SHIFT Left and Right
     signal s_AddSubOUT  : std_logic_vector(31 downto 0);
+    signal s_sltOUT     : std_logic_vector(31 downto 0);
+    signal s_sltuOUT    : std_logic_vector(31 downto 0);
 
-    signal s_Mux_0t2    : std_logic_Vector(31 downto 0);
-    signal s_Mux_1t2    : std_logic_Vector(31 downto 0);
+    signal s_nAddSub_nTa: std_logic;    -- From NOT gate to AND gate
+    signal s_nAddSub_aTo: std_logic;    -- From AND gate to OR gate
+    signal sc_nAddSub   : std_logic;    -- Used to drive nAddSub control
+    signal s_MSB_Cin    : std_logic;    -- Carries carry-in to MSB
+    signal s_MSB_Cout   : std_logic;    -- Carries carry-out of MSB
+
+    signal s_Mux_0t2    : std_logic_vector(31 downto 0);
+    signal s_Mux_1t2    : std_logic_vector(31 downto 0);
+
     -- Components:
+    component invg is
+        port(i_A          : in  std_logic;
+             o_F          : out std_logic);
+    end component;
+
+    component andg2 is
+        port(i_A          : in  std_logic;
+             i_B          : in  std_logic;
+             o_F          : out std_logic);
+    end component;
+
+    component org2 is
+        port(i_A          : in  std_logic;
+             i_B          : in  std_logic;
+             o_F          : out std_logic);
+    end component;
+
     component and_ALU is
         generic(N : natural := 32); -- Make this file flexible because why not
         port(i_aDA  : in  std_logic_vector(N-1 downto 0);
@@ -63,33 +89,57 @@ architecture structural of proj01_ALU is
              o_vect_Out : out std_logic_vector(31 downto 0) );
     end component;
 
-    component addSub is
+    component addSub_BRANCH is
         generic (N : integer := 32);        -- use 32 for now. Value not specified in Lab Doc
         port(i_Da       : in  std_logic_vector(N-1 downto 0);
              i_Db       : in  std_logic_vector(N-1 downto 0);
              nAdd_Sub   : in  std_logic;    -- used as control/carry
              o_Sum      : out std_logic_vector(N-1 downto 0);
+             o_MSB_Cin  : out std_logic;
              o_Car      : out std_logic);   -- used for last carry output
     end component;
 
-    component busMux_2t1 is
-        port(i_dZero  : in std_logic_vector(31 downto 0);
-             i_dOne   : in std_logic_vector(31 downto 0);
-             ALUSrc   : in std_logic; -- select line. It's named poorly. I wasn't thinking ahead
-             o_dOUT   : out std_logic_vector(31 downto 0));
+    component proj01_SLT is
+        port(i_MSB      : in  std_logic;
+             i_MSB_Cin  : in  std_logic;
+             i_MSB_Cout : in  std_logic;
+             o_slt      : out std_logic_vector(31 downto 0);    -- SLT output
+             o_sltu     : out std_logic_vector(31 downto 0));    -- SLTu output
     end component;
 
-    component busMux_4t1 is 
-        port(i_Da   : in  std_logic_vector(31 downto 0);    -- Input 1
-             i_Db   : in  std_logic_vector(31 downto 0);    -- Input 2
-             i_Dc   : in  std_logic_vector(31 downto 0);    -- Input 3
-             i_Dd   : in  std_logic_vector(31 downto 0);    -- Input 4
-             C_S0   : in  std_logic;                        -- Sel line 0
-             C_S1   : in  std_logic;                        -- Sel line 1
-             o_Do   : out std_logic_vector(31 downto 0) );  -- Output
+    component busMux_8t1 is
+        port(i_D0   : in  std_logic_vector(31 downto 0);
+             i_D1   : in  std_logic_vector(31 downto 0);
+             i_D2   : in  std_logic_vector(31 downto 0);
+             i_D3   : in  std_logic_vector(31 downto 0);
+             i_D4   : in  std_logic_vector(31 downto 0);
+             i_D5   : in  std_logic_vector(31 downto 0);
+             i_D6   : in  std_logic_vector(31 downto 0);
+             i_D7   : in  std_logic_vector(31 downto 0);
+             c_sel0 : in  std_logic;
+             c_sel1 : in  std_logic;
+             c_sel2 : in  std_logic;
+             o_Dout : out std_logic_vector(31 downto 0));
     end component;
     
 begin
+
+    ------ INSTANTIATE LOGIC FOR nAddSub ------
+    -- funct7(5) OR [~funct3(2) AND funct3(1)]
+    INST_NOT_SUB_Ctrl: invg port map(
+        i_A => i_ALUctl(2),
+        o_F => s_nAddSub_nTa);
+
+    INST_AND_SUB_Ctrl: andg2 port map(
+        i_A => s_nAddSub_nTa,
+        i_B => i_ALUctl(3),
+        o_F => s_nAddSub_aTo);
+
+    INST_OR_SUB_Ctrl: org2 port map(
+        i_A => s_nAddSub_aTo,
+        i_B => i_ALUctl(0),
+        o_F => sc_nAddSub);
+    -------------------------------------------
 
     -- Instantiate AND ALU fucntionality
     INST_AND: and_ALU port map(
@@ -118,21 +168,29 @@ begin
         o_vect_Out  => s_shiftOUT);
 
     -- Instantiate Add/Sub ALU functionality
-    INST_ADDSUB: addSub port map(
+    INST_ADDSUB: addSub_BRANCH port map(
         i_Da        => i_A,
         i_Db        => i_B,
-        nAdd_Sub    => i_ALUctl(0),     -- funct7(5)
+        nAdd_Sub    => sc_nAddSub,     -- funct7(5) OR [~funct3(2) AND funct3(1)]
         o_Sum       => s_AddSubOUT,     -- Sum is output vector
-        o_Car       => open);           -- Carry is last carry bit. Leave open - We don't need it rn
+        o_MSB_Cin   => s_MSB_Cin,
+        o_Car       => s_MSB_Cout);
+
+    INST_SLT: proj01_SLT port map(
+        i_MSB       => s_AddSubOUT(31), 
+        i_MSB_Cin   => s_MSB_Cin, 
+        i_MSB_Cout  => s_MSB_Cout,
+        o_slt       => s_sltOUT, 
+        o_sltu      => s_sltuOUT);
      
 
     -- 2x [4t1 Mux]  ->  1x [2t1 mux]  ->  output
         -- Da0  000  Add/Sub
-        -- Db0  001  Shift
-        -- Dc0  010  0x00000000  (Will be slt later)
-        -- Dd0  011  Shift...?   (for now...?)...? (I think this is o_zero later)
+        -- Db0  001  Shift (Left)
+        -- Dc0  010  sltn
+        -- Dd0  011  sltnu
         -- Da1  100  XORn
-        -- Db1  101  Shift
+        -- Db1  101  Shift (Right)
         -- Dc1  110  ORn
         -- Dd1  111  ANDn
 
@@ -140,31 +198,20 @@ begin
         -- i_ALUctl(3) = funct3(1)      -- Used for mux, 
         -- i_ALUctl(2) = funct3(2)      -- Used for mux, Shift direction
         -- i_ALUctl(1) = funct3(0)      -- Used for mux
-        -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub, Shift s_ex
-
-    -- Instantiate busMuxes
-    INST_BUSMUX_4t1_0: busMux_4t1 port map(
-        i_Da    => s_AddSubOUT,     -- Input AddSub
-        i_Db    => s_shiftOUT,      -- Input Left Shift
-        i_Dc    => x"00000000",     -- Become slt later
-        i_Dd    => s_shiftOUT,      -- (Become o_zero later?)
-        C_S0    => i_ALUctl(1),     -- funct3(0)
-        C_S1    => i_ALUctl(3),     -- funct3(1)
-        o_Do    => s_Mux_0t2);      -- Go to port 0 of 2t1 mux
-
-    INST_BUSMUX_4t1_1: busMux_4t1 port map(
-        i_Da    => s_xorOUT,        -- Input XOR
-        i_Db    => s_shiftOUT,      -- Input Right Shift
-        i_Dc    => s_orOUT,         -- Input OR
-        i_Dd    => s_andOUT,        -- Input AND
-        C_S0    => i_ALUctl(1),     -- funct3(0)
-        C_S1    => i_ALUctl(3),     -- funct3(1)
-        o_Do    => s_Mux_1t2);      -- Go to port 1 of 2t1 mux
-
-    INST_BUSMUX_2t1_2: busMux_2t1 port map(
-        i_dZero => s_Mux_0t2,       -- Mux4t1_0 input
-        i_dOne  => s_Mux_1t2,       -- Mux4t1_1 input
-        ALUSrc  => i_ALUctl(2),     -- funct3(2)
-        o_dOUT  => o_ALUout);       -- Final ALU Output
+        -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub*, Shift s_ex
+    
+    INST_BUSMUX_8t1: busMux_8t1 port map(
+        i_D0    => s_AddSubOUT,     -- AddSub 
+        i_D1    => s_shiftOUT,      -- Left Shift 
+        i_D2    => s_sltOUT,        -- SLT
+        i_D3    => s_sltuOUT,       -- SLTU
+        i_D4    => s_xorOUT,        -- XOR
+        i_D5    => s_shiftOUT,      -- Right Shift
+        i_D6    => s_orOUT,         -- OR / NOR (still need nor. Delete this when done)
+        i_D7    => s_andOUT,        -- AND
+        c_sel0  => i_ALUctl(1),     -- funct3(0)
+        c_sel1  => i_ALUctl(3),     -- funct3(1)
+        c_sel2  => i_ALUctl(2),     -- fucnt3(2)
+        o_Dout  => o_ALUout);       -- Final Mux Output
 
 end architecture;

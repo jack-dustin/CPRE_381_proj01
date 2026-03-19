@@ -30,7 +30,7 @@ architecture structural of addSub is
                 o_C     : out std_logic   ); -- Not Bus. Final Carry Output
     end component;
 
-    component mux2t1_N is   -- from THE Duwe. Yes, Duwe himself!!
+    component mux2t1_N is   -- from THE Duwe. 
         generic (N : natural := 16);
         port (  i_S     : in std_logic;
                 i_D0    : in std_logic_vector(N-1 downto 0);
