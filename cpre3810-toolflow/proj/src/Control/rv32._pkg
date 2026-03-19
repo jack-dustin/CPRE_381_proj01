@@ -18,6 +18,8 @@ package rv32_pkg is
   constant OP_AUIPC  : std_logic_vector(6 downto 0) := "0010111";
 
   -- ALU ops
+
+  
   type alu_op_t is (
     ALU_ADD, ALU_SUB,
     ALU_AND, ALU_OR, ALU_XOR,

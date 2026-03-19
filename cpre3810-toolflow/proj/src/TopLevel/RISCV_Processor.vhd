@@ -58,6 +58,45 @@ architecture structure of RISCV_Processor is
   -- Required overflow signal -- for overflow exception detection
   signal s_Ovfl         : std_logic;  -- this signal indicates an overflow exception would have been initiated
 
+  -- ALU control signals
+  signal s_ALUsrc       : std_logic;
+  signal s_ALUop        : alu_op_t;
+
+  -- write back to reg signal
+  signal s_WBsel        : wb_sel_t; 
+
+  -- branch ctrl signal
+  signal s_Branch       : std_logic;
+
+  -- jump ctrl signal
+  signal s_jal          : std_logic;
+  signal s_jalr         : std_logic;
+
+  -- mem_size for sw lw and varied sizes, signal
+  signal s_memsize      : std_logic_vector(N-1 downto 0);
+
+  -- memory data signed or unsigned ctrl signal
+  signal s_MemSign      : std_logic;
+
+  -- register output signals
+  signal s_Ors1         : std_logic_vector(N-1 downto 0);
+  signal s_Ors2         : std_logic_vector(N-1 downto 0);
+
+  -- extender output signals
+  signal s_Oext         : std_logic_vector(N-1 downto 0);
+
+  -- data memory re 
+  signal s_DMemRD : std_logic;
+
+  -- ALU output signal
+  signal s_ALUOut : std_logic_vector(N-1 downto 0);
+
+  -- ALU 2nd input mux output
+  signal s_ALUIn2 : std_logic_vector(N-1 downto 0);
+  
+ -- TEMP ADDSUB SELECT
+  signal ADD_SUBsel : std_logic;
+
   component mem is
     generic(ADDR_WIDTH : integer;
             DATA_WIDTH : integer);
@@ -72,15 +111,15 @@ architecture structure of RISCV_Processor is
   -- TODO: You may add any additional signals or components your implementation 
   --       requires below this comment
 
-  component proj1_fetch is
-    generic(ADDR_WIDTH : integer;
-            DATA_WIDTH : integer);
-    port(i_CLK      : in std_logic;
-         i_RST_PC   : in std_logic;     -- Need different reset* (this one); We need to reset register to 0x0040.0000 not 0x0000.0000
-         i_imm      : in std_logic_vector((DATA_WIDTH - 1) downto 0);     -- imm AFTER SIGN-EXTENDING AND MUXING
-         c_PC_add   : in std_logic;                         -- Control bit for choosing between "+4" and "+imm"
-         o_PC       : out std_logic_vector((DATA_WIDTH - 1) downto 0) );  -- Output from PC register to Instruction memory)
-  end component;
+  component proj1_fetch is 
+  port(
+    i_CLK    : in  std_logic;
+    i_RST_PC : in  std_logic;
+    i_imm    : in  std_logic_vector(31 downto 0);
+    c_PC_add : in  std_logic;
+    o_PC     : out std_logic_vector(31 downto 0)
+  );
+end component;
 
   component ctrl_decoder is
     generic(ADDR_WIDTH : integer;
@@ -105,64 +144,86 @@ architecture structure of RISCV_Processor is
   end component;
 
   component reg_file is
-    generic(ADDR_WIDTH : integer;
-            DATA_WIDTH : integer);
+    
     port(
-          i_RS1   : in std_logic_vector((ADDR_WIDTH - 1) downto 0);   -- 5 bit bus    -- [19:15]
-          i_RS2   : in std_logic_vector((ADDR_WIDTH - 1) downto 0);   -- 5 bit bus    -- [24:20]
-          o_rs1   : out std_logic_vector((DATA_WIDTH - 1) downto 0);    -- Result of RS1 input
-          o_rs2   : out std_logic_vector((DATA_WIDTH - 1) downto 0);    -- Result of RS2 input
-          i_rd    : in std_logic_vector((ADDR_WIDTH - 1) downto 0);   -- 5 but bus    -- [11:7]
+          i_RS1   : in std_logic_vector(4 downto 0);   -- 5 bit bus    -- [19:15]
+          i_RS2   : in std_logic_vector(4 downto 0);   -- 5 bit bus    -- [24:20]
+          o_rs1   : out std_logic_vector(31 downto 0);    -- Result of RS1 input
+          o_rs2   : out std_logic_vector(31 downto 0);    -- Result of RS2 input
+          i_rd    : in std_logic_vector(4 downto 0);   -- 5 but bus    -- [11:7]
           i_dEN   : in std_logic;     -- Decoder EN bit
           i_RST   : in std_logic;     -- RESET bit
           i_CLK   : in std_logic;     -- Clock Signal for register
-          i_DATA  : in std_logic_vector((DATA_WIDTH - 1) downto 0));  -- 32 bit bus   -- Register Data Input
+          i_DATA  : in std_logic_vector(31 downto 0));  -- 32 bit bus   -- Register Data Input
   end component;
 
+  -- replace with imm-gen component
+
   component extenders is 
-    generic(DATA_WIDTH : integer);
+    
     port(
          i_imm  : in std_logic_vector(11 downto 0);    -- input 12 bit immediate value
          i_ZoS  : in std_logic;                        -- Bit to choose between 
-         o_out  : out std_logic_vector((DATA_WIDTH - 1) downto 0));   -- Output (32-bit) vector
+         o_out  : out std_logic_vector(31 downto 0));   -- Output (32-bit) vector
   end component;
+
+  component mux2t1_N is
+    generic (N : integer);
+    port(
+          i_D0   : in std_logic_vector(31 downto 0);
+          i_D1   : in std_logic_vector(31 downto 0);
+          i_S  : in std_logic;
+          o_O  : out std_logic_vector(31 downto 0));
+  end component;
+
+  -- component alu is
+  --   generic(DATA_WIDTH : integer);
+  --   port(
+  --         i_A     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
+  --         i_B     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
+  --         i_ALUctl : in std_logic_vector(3 downto 0);   -- control bus for ALU operation (e.g., add, sub, and, or, etc.)
+  --         o_Y    : out std_logic_vector((DATA_WIDTH - 1) downto 0) -- ALU output determined by control signal
+  --   ); 
+  -- end component;
 
   component addSub is
-    generic(DATA_WIDTH : integer);
-    port (  i_Da        :   in std_logic_vector(DATA_WIDTH-1 downto 0);
-            i_Db        :   in std_logic_vector(DATA_WIDTH-1 downto 0);
-            nAdd_Sub    :   in std_logic;   -- used as control/carry
-            o_Sum       :   out std_logic_vector(DATA_WIDTH-1 downto 0);
-            o_Car       :   out std_logic);  -- used for last carry output
-  end component;
-
-  component MySecondDataPath is
-    generic(ADDR_WIDTH : integer;
-            DATA_WIDTH : integer);
-     port(nAddSub    : in std_logic;     -- Control bit for Adder/Subtractor
-             i_CLK      : in std_logic;         -- Clock (obviously)
-             i_RST      : in std_logic;         -- Reset (obivously)
-             i_rs1      : in std_logic_vector((ADDR_WIDTH - 1) downto 0);
-             i_rs2      : in std_logic_vector((ADDR_WIDTH - 1) downto 0);
-             i_rd       : in std_logic_vector((ADDR_WIDTH - 1) downto 0);
-             i_imm      : in std_logic_vector((DATA_WIDTH - 1) downto 0); -- Need for immediate value. Here we will run it through the extender
-             i_ALUSrc   : in std_logic;         -- Controls using rs2 OR imm
-             i_memOut   : in std_logic_vector((DATA_WIDTH - 1) downto 0); -- input to mux from memory
-             mem_o_alu  : in std_logic;     -- select for choosing adder or memory output to load into register(s)
-             regWrite   : in std_logic;         -- i_dEN : Decoder Enable
-         
-             o_Data     : out std_logic_vector((DATA_WIDTH - 1) downto 0);    -- Used to show output of bus mux
-             o_rs1      : out std_logic_vector((DATA_WIDTH - 1) downto 0);
-             o_rs2      : out std_logic_vector((DATA_WIDTH - 1) downto 0);
-             o_alu      : out std_logic_vector((DATA_WIDTH - 1) downto 0) );
-  end component;
+  generic (N : integer := 32);
+  port(
+    i_Da     : in  std_logic_vector(N-1 downto 0);
+    i_Db     : in  std_logic_vector(N-1 downto 0);
+    nAdd_Sub : in  std_logic;
+    o_Sum    : out std_logic_vector(N-1 downto 0);
+    o_Car    : out std_logic
+  );
+end component;
 
 begin
   s_Ovfl <= '0'; -- RISC-V does not have hardware overflow detection.
+  s_RegWrAddr <= s_Inst(11 downto 7);  -- rd
+  s_RegWrData <= s_ALUOut;             -- write ALU result
+  oALUOut     <= s_ALUOut;             -- drive top-level output
+  -- ===== ADD/ADDI bring-up: tie off unused data memory inputs =====
+  s_DMemAddr <= (others => '0');
+  s_DMemData <= (others => '0');
+ -- WFI detect: opcode=1110011, funct3=000, imm12=0x105
+-- Only treat it as HALT when we're EXECUTING (not loading IMem, not in reset)
+-- WFI detect (SYSTEM opcode 1110011, funct3=000, imm12=0x105)
+-- Also block halting at the reset PC value so we don't stop immediately after reset_done
+s_Halt <= '1' when (iRST='0' and
+                    s_PC /= x"00400000" and
+                    s_Inst(6 downto 0)    = "1110011" and
+                    s_Inst(14 downto 12) = "000"     and
+                    s_Inst(31 downto 20) = x"105")
+          else '0';
+
+-- Gate register writes off during WFI (avoid std_logic and/not operator issues)
+ADD_SUBsel <= '1' when s_ALUop = ALU_SUB else '0';
+          
   -- TODO: This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
   with iInstLd select
     s_IMemAddr <= s_PC when '0',
       iInstAddr when others;
+
 
 
   IMem: mem
@@ -188,80 +249,80 @@ begin
   -- TODO: Implement the rest of your processor below this comment! 
 
   IFetch: proj1_fetch
-    generic map(ADDR_WIDTH => ADDR_WIDTH,
-                DATA_WIDTH => N)
-    port map(
-              i_CLK   
-              i_RST_PC
-              i_imm   
-              c_PC_add
-              o_PC  
-             );
+  port map(
+    i_CLK    => iCLK,
+    i_RST_PC => iRST,
+    i_imm    => s_Oext,   -- from your extenders output (sign-extended imm)
+    c_PC_add => '0',      -- for now: always PC+4
+    o_PC     => s_PC
+  );
   CDec: ctrl_decoder
     generic map(ADDR_WIDTH => ADDR_WIDTH,
                 DATA_WIDTH => N)
     port map(
-              instr    
-              reg_we   
-              alu_src  
-              mem_we   
-              mem_re   
-              wb_sel   
-              is_branch
-              is_jal   
-              is_jalr  
-              alu_op   
-              mem_sign  
+              instr     => s_Inst,
+              reg_we    => s_RegWr,
+              alu_src   => s_ALUsrc,
+              mem_we    => s_DMemWr,
+              mem_re    => s_DMemRD,
+              wb_sel    => s_WBsel,
+              is_branch => s_Branch,
+              is_jal    => s_jal,
+              is_jalr   => s_jalr,
+              alu_op    => s_ALUop,
+              mem_sign  => s_MemSign
+              -- mem_size  => s_memsize
              );
   Rfile: reg_file
-    generic map(ADDR_WIDTH => ADDR_WIDTH,
-                DATA_WIDTH => N)
+    
     port map(
-              i_RS1 
-              i_RS2 
-              o_rs1 
-              o_rs2 
-              i_rd  
-              i_dEN 
-              i_RST 
-              i_CLK 
-              i_DATA
+              i_RS1   => s_Inst(19 downto 15),
+              i_RS2   => s_Inst(24 downto 20),
+              o_rs1   => s_Ors1,
+              o_rs2   => s_Ors2,
+              i_rd    => s_RegWrAddr, -- s_Inst(11 downto 7)
+              i_dEN   => s_RegWr,
+              i_RST   => iRST,
+              i_CLK   => iCLK,
+              i_DATA  => s_RegWrData
              );
+  -- -- currently only I type extender
   Ext: extenders
-    generic map(ADDR_WIDTH => ADDR_WIDTH,
-                DATA_WIDTH => N)
+    
     port map(
-              i_imm
-              i_ZoS
-              o_out
+              i_imm => s_Inst(31 downto 20),
+              i_ZoS => '1',--control of zero or sign extend
+              o_out => s_Oext
              );
-  LAddsub: addSub
-    generic map(ADDR_WIDTH => ADDR_WIDTH,
-                DATA_WIDTH => N)
+  
+  Mux_ALUSrc: mux2t1_N
+    generic map(N => N)   -- top-level N generic
     port map(
-              i_Da    
-              i_Db    
-              nAdd_Sub
-              o_Sum   
-              o_Car   
+              i_D0   => s_Ors2, -- rs2
+              i_D1   => s_Oext, -- imm from extender
+              i_S  => s_ALUsrc, -- control signal for choosing rs2 or imm
+              o_O  => s_ALUIn2  -- TODO: connect this to the second input of your ALU
              );
-  DataP: MySecondDataPath
-    generic map(ADDR_WIDTH => ADDR_WIDTH,
-                DATA_WIDTH => N)
-    port map(
-              i_CLK    
-              i_RST    
-              i_rs1    
-              i_rs2    
-              i_rd     
-              i_imm    
-              i_ALUSrc 
-              i_memOut 
-              mem_o_alu
-              regWrite 
-              o_Data   
-              o_rs1    
-              o_rs2    
-              o_alu    
-             );
+
+  -- ALU: alu
+  --   generic map(DATA_WIDTH => N)
+  --   port map(
+  --             i_A     => s_Ors1, -- rs1
+  --             i_B     => s_ALUIn2, -- output of ALU input mux
+  --             i_ALUctl => s_ALUop, -- control signal from control decoder for ALU operation
+  --             o_Y    => s_ALUOut  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
+  --            );
+
+  -- ADD/ADDI bring-up: add only (no subtract yet)
+LAddsub: addSub
+  generic map(N => N)
+  port map(
+    i_Da     => s_Ors1,     -- rs1
+    i_Db     => s_ALUIn2,   -- rs2 or imm (from your mux)
+    nAdd_Sub => ADD_SUBsel,        -- force ADD for now
+    o_Sum    => s_ALUOut,
+    o_Car    => open
+  );
+  -- write back to regfile mux
+
 end structure;
