@@ -17,7 +17,6 @@ architecture proj01_ALU of tb_proj01_ALU is
     signal s_iA         : std_logic_vector(31 downto 0);    -- input A (RS1)
     signal s_iB         : std_logic_vector(31 downto 0);    -- input B (RS2 || Imm)
     signal s_ALU_Out    : std_logic_vector(31 downto 0);    -- Output of ALU
-    signal s_INV        : std_logic;    -- Used to turn OR --> NOR
     signal s_Branch_Out : std_logic;    -- Used for branching (AND gate with opcode for selecting fetch adder results)
     
     signal t_ALUctrl    : std_logic_vector(3 downto 0);     -- 4 bits
@@ -25,8 +24,7 @@ architecture proj01_ALU of tb_proj01_ALU is
     component proj01_ALU is
     port(i_A        : in  std_logic_vector(31 downto 0);    -- RS1
          i_B        : in  std_logic_vector(31 downto 0);    -- RS2 or IMM
-         i_INV      : in  std_logic;    -- Controls OR(0) vs NOR(1) --> 0 is default
-         i_ALUctl   : in  std_logic_vector(3 downto 0);     -- Control Signals
+         i_ALUctl   : in  std_logic_vector(3  downto 0);    -- Control Signals
          o_ALUout   : out std_logic_vector(31 downto 0);    -- Main Output ALU
          o_branchOut: out std_logic);   -- Branching Logic Output
     end component;
@@ -36,7 +34,6 @@ architecture proj01_ALU of tb_proj01_ALU is
         -- Component => Signal
         port map(i_A       => s_iA,
                  i_B       => s_iB,
-                 i_INV     => s_INV,
                  i_ALUctl  => t_ALUctrl,
                  o_ALUout  => s_ALU_Out, 
                  o_branchOut => s_Branch_Out);
@@ -53,7 +50,7 @@ architecture proj01_ALU of tb_proj01_ALU is
     -- i_ALUctl(3) = funct3(1)      -- Used for mux, 
     -- i_ALUctl(2) = funct3(2)      -- Used for mux, Shift direction
     -- i_ALUctl(1) = funct3(0)      -- Used for mux
-    -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub, Shift s_ex
+    -- i_ALUctl(0) = funct7(5)      -- Used for nAddSub, Shift s_ex, OR -> NOR
 
     -- Top 3 bits [3:1] of s_ALUctl
     -- 000_  Add/Sub
@@ -70,7 +67,6 @@ architecture proj01_ALU of tb_proj01_ALU is
     -- s_ALUctl(1) = funct3(0)  -- Used for mux
     -- s_ALUctl(0) = funct7(5)  -- Used for nAddSub, Shift s_ex
 
-        s_INV   <= '0'; -- Set to 0 for now. Used for OR --> NOR
         --------------------------------
         -------- AND Unit --------------
         -- Test Case 1: 0 AND 0
@@ -211,50 +207,48 @@ architecture proj01_ALU of tb_proj01_ALU is
 
         --------------------------------
         -------- NOR Unit ---------------
-        s_INV   <= '0';
-        -- Test Case 1: 0 OR 0
-        s_ALUctrl   <= x"C";        -- 1100
+        -- Test Case 1: 0 NOR 0
+        s_ALUctrl   <= x"D";        -- 1101
         s_iA        <= x"00000000"; -- 0000 0000 0000 0000 . . . 
         s_iB        <= x"00000000"; -- 0000 0000 0000 0000 . . .
         wait for 5 ns;
         -- Expect: !0x0000 0000  --> 0xFFFF FFFF       
 
-        -- Test Case 2: 1 OR 1
-        s_ALUctrl   <= x"C";        -- 1100
+        -- Test Case 2: 1 NOR 1
+        s_ALUctrl   <= x"D";        -- 1101
         s_iA        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . . 
         s_iB        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
         wait for 5 ns;
         -- Expect: !0xFFFF FFFF  --> 0x0000 0000
 
-        -- Test Case 3: 0 OR 1
-        s_ALUctrl   <= x"C";        -- 1100
+        -- Test Case 3: 0 NOR 1
+        s_ALUctrl   <= x"D";        -- 1101
         s_iA        <= x"00000000"; -- 0000 0000 0000 0000 . . . 
         s_iB        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
         wait for 5 ns;
         -- Expect: !0xFFFF FFFF  --> 0x0000 0000
 
-        -- Test Case 4: 1 OR 0
-        s_ALUctrl   <= x"C";        -- 1100
+        -- Test Case 4: 1 NOR 0
+        s_ALUctrl   <= x"D";        -- 1101
         s_iA        <= x"FFFFFFFF"; -- 1111 1111 1111 1111 . . .
         s_iB        <= x"00000000"; -- 0000 0000 0000 0000 . . . 
         wait for 5 ns;
         -- Expect: !0xFFFF FFFF  --> 0x0000 0000
 
-        -- Test Case 5: F0F0... OR 0F0F...
-        s_ALUctrl   <= x"C";        -- 1100
+        -- Test Case 5: F0F0... NOR 0F0F...
+        s_ALUctrl   <= x"D";        -- 1101
         s_iA        <= x"F0F0F0F0"; -- 1111 0000 1111 0000 . . .
         s_iB        <= x"0F0F0F0F"; -- 0000 1111 0000 1111 . . . 
         wait for 5 ns;
         -- Expect: !0xFFFF FFFF  --> 0x0000 0000
 
-        -- Test Case 6: 0F0F... OR F0F0...
-        s_ALUctrl   <= x"C";        -- 1100
+        -- Test Case 6: 0F0F... NOR F0F0...
+        s_ALUctrl   <= x"D";        -- 1101
         s_iA        <= x"0F0F0F0F"; -- 0000 1111 0000 1111 . . .
         s_iB        <= x"F0F0F0F0"; -- 1111 0000 1111 0000 . . . 
         wait for 5 ns;
         -- Expect: !0xFFFF FFFF  --> 0x0000 0000
 
-        s_INV   <= '0'; -- Set back to 0 for default
     wait for 10 ns;     -- Make it more obvious when the next test starts
 
         --------------------------------

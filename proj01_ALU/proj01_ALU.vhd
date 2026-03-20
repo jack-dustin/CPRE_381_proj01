@@ -9,7 +9,6 @@ use IEEE.numeric_std.all;
 entity proj01_ALU is
     port(i_A        : in  std_logic_vector(31 downto 0);    -- RS1
          i_B        : in  std_logic_Vector(31 downto 0);    -- RS2 or IMM
-         i_INV      : in  std_logic;    -- Controls OR(0) vs NOR(1) --> 0 is default
          i_ALUctl   : in  std_logic_vector(3 downto 0);     -- All control signals we are supposed to need
             -- LeftMost bit of o_alu_op from Excel is (3)
             -- i_ALUctl(3) = funct3(1)      -- Used for mux, 
@@ -204,7 +203,7 @@ begin
     INST_NOR_MUX: busMux_2t1 port map(
         i_dZero     => s_orOUT,
         i_dOne      => s_NOR_t_mux,
-        ALUSrc      => i_INV,
+        ALUSrc      => i_ALUctl(0),
         o_dOUT      => s_ORm_t_Fm);
 
     -- Instantiate shifting ALU functionality
