@@ -50,6 +50,7 @@ begin
     port map(i_A    => i_MSB_Cout,
              o_F    => s_sltu_0);
 
+    -- Pass both results back into the ALU as internal signals
     o_slt   <= (31 downto 1 => '0') & s_slt_0;
     o_sltu  <= (31 downto 1 => '0') & s_sltu_0;
 
