@@ -14,8 +14,6 @@ entity basic_adder_n is
             -- inside of the adder. Thus, don't need "(N-1 downto 0)"
             i_C     : in std_logic;  -- I am not supply a bus of inputs to this
             o_C     : out std_logic); -- I am not supplying 
-           
-
 end basic_adder_n;
 
 architecture structural of basic_adder_n is

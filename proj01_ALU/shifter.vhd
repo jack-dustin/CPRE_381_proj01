@@ -3,6 +3,11 @@
 -- Start Date: 3.7.2026,    6:03 PM
 
 -- Shifting Unit
+-- NOTE: for future optimization
+    -- I choose between shifted right or left result at the bottom of this file.
+    -- The 8 to 1 mux already does this.
+    -- So I a mux to choose between two signals. Split that signal into 2 and send both
+        -- to shift right and shift left ports of the 8 to 1 ALU mux
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
