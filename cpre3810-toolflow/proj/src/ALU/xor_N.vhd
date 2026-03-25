@@ -12,7 +12,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 -- N-Bit xor
--- Natural ~= Unsigned* Integer*
+-- Natural = Unsigned* Integer*
 entity xor_N is
     generic(N : natural := 32); 
     port(i_A : in  std_logic_vector(N-1 downto 0);
