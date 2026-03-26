@@ -1,1 +1,1 @@
-proj/riscv/cpre3810_test_assembly_program_suite/sll_nsjund_3.s
+proj/riscv/addiseq.s

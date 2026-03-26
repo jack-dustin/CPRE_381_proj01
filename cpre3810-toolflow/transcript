@@ -12,75 +12,134 @@
 # // of the Customer's facilities without the express written permission of SISW,
 # // and may not be used in any way not expressly authorized by SISW.
 # //
-cd /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/output/addiseq.s
-vsim work.tb
-# vsim work.tb 
-# Start time: 08:59:21 on Mar 13,2026
-# ** Note: (vsim-3812) Design is being optimized...
-# Loading std.standard
-# Loading std.textio(body)
-# Loading ieee.std_logic_1164(body)
-# Loading ieee.std_logic_textio(body)
-# Loading std.env(body)
-# Loading work.tb(mixed)#1
-# Loading work.riscv_types(body)
-# Loading ieee.numeric_std(body)
-# Loading work.mux_32t1_package
-# Loading work.riscv_processor(structure)#1
-# Loading work.busmux_2t1(dataflow)#1
-# Loading work.reg_n(structural)#1
-# Loading work.basic_adder_n(structural)#1
-# Loading work.mux2t1_n(structural)#1
-mem load -infile imem.hex -format hex /tb/MyRiscv/IMem/ram
+cd /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/output/lw_jbinstoc_test1.s
 add wave -position insertpoint  \
-sim:/tb/MyRiscv/N \
-sim:/tb/MyRiscv/iCLK \
-sim:/tb/MyRiscv/iRST \
-sim:/tb/MyRiscv/iInstLd \
-sim:/tb/MyRiscv/iInstAddr \
-sim:/tb/MyRiscv/iInstExt \
-sim:/tb/MyRiscv/oALUOut \
-sim:/tb/MyRiscv/s_DMemWr \
-sim:/tb/MyRiscv/s_DMemAddr \
-sim:/tb/MyRiscv/s_DMemData \
-sim:/tb/MyRiscv/s_RegWr \
-sim:/tb/MyRiscv/s_RegWrAddr \
-sim:/tb/MyRiscv/s_RegWrData \
-sim:/tb/MyRiscv/s_IMemAddr \
-sim:/tb/MyRiscv/s_PC \
-sim:/tb/MyRiscv/s_Inst \
-sim:/tb/MyRiscv/s_Halt \
-sim:/tb/MyRiscv/s_Ovfl \
-sim:/tb/MyRiscv/s_ALUsrc \
-sim:/tb/MyRiscv/s_Ors1 \
-sim:/tb/MyRiscv/s_Ors2 \
-sim:/tb/MyRiscv/s_Oext \
-sim:/tb/MyRiscv/s_ALUOut \
-sim:/tb/MyRiscv/s_ALUIn2
-add wave -position end  sim:/tb/OUTPUT_TRACE
-add wave -position end  sim:/tb/MyRiscv/Rfile/wire_iReg
-run 100
-# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-#    Time: 0 ns  Iteration: 0  Instance: /tb/MyRiscv/IMem
-run 200
-# ** Note: Data structure takes 73929336 bytes of memory
-#          Process time 0.21 seconds
-#          stop
-#    Time: 240 ns  Iteration: 1  Instance: /tb
-# Break in Process P_DUMP_STATE at /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/internal/testpy/tb.vhd line 150
-add wave -position end  sim:/tb/MyRiscv/Rfile/wire_WE
-add wave -position end  sim:/tb/MyRiscv/CDec/is_itype
+vsim:/tb/CLK \
+vsim:/tb/reset \
+vsim:/tb/reset_done \
+vsim:/tb/alu_out
+add wave -position insertpoint  \
+vsim:/tb/MyRiscv/iCLK \
+vsim:/tb/MyRiscv/iRST \
+vsim:/tb/MyRiscv/iInstLd \
+vsim:/tb/MyRiscv/iInstAddr \
+vsim:/tb/MyRiscv/iInstExt \
+vsim:/tb/MyRiscv/oALUOut \
+vsim:/tb/MyRiscv/s_DMemWr \
+vsim:/tb/MyRiscv/s_DMemAddr \
+vsim:/tb/MyRiscv/s_DMemData \
+vsim:/tb/MyRiscv/s_DMemOut \
+vsim:/tb/MyRiscv/s_RegWr \
+vsim:/tb/MyRiscv/s_RegWrAddr \
+vsim:/tb/MyRiscv/s_RegWrData \
+vsim:/tb/MyRiscv/s_IMemAddr \
+vsim:/tb/MyRiscv/s_PC \
+vsim:/tb/MyRiscv/s_Inst \
+vsim:/tb/MyRiscv/s_Halt \
+vsim:/tb/MyRiscv/s_Ovfl \
+vsim:/tb/MyRiscv/s_ALUsrc \
+vsim:/tb/MyRiscv/s_ALUop \
+vsim:/tb/MyRiscv/s_WBsel \
+vsim:/tb/MyRiscv/s_Branch \
+vsim:/tb/MyRiscv/s_jal \
+vsim:/tb/MyRiscv/s_jalr \
+vsim:/tb/MyRiscv/s_memsize \
+vsim:/tb/MyRiscv/s_MemSign \
+vsim:/tb/MyRiscv/s_Ors1 \
+vsim:/tb/MyRiscv/s_Ors2 \
+vsim:/tb/MyRiscv/s_Oext \
+vsim:/tb/MyRiscv/s_DMemRD \
+vsim:/tb/MyRiscv/s_ALUOut \
+vsim:/tb/MyRiscv/s_ALUIn2 \
+vsim:/tb/MyRiscv/s_ALUctl \
+vsim:/tb/MyRiscv/s_Uext \
+vsim:/tb/MyRiscv/s_isLUI \
+vsim:/tb/MyRiscv/s_LoadOut \
+vsim:/tb/MyRiscv/s_Inst_q \
+vsim:/tb/MyRiscv/s_RegWrAddr_c \
+vsim:/tb/MyRiscv/s_RegWrData_c \
+vsim:/tb/MyRiscv/s_RegWr_c
+# Can't move the Now cursor.
 restart -f
-# ** Note: (vsim-12125) Error and warning message counts have been reset to '0' because of 'restart'.
-# ** Note: (vsim-8009) Loading existing optimized design _opt1
-mem load -infile imem.hex -format hex /tb/MyRiscv/IMem/ram
-run 400
-# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-#    Time: 0 ns  Iteration: 0  Instance: /tb/MyRiscv/IMem
-# ** Note: Data structure takes 91099768 bytes of memory
-#          Process time 0.05 seconds
-#          stop
-#    Time: 240 ns  Iteration: 1  Instance: /tb
-# Break in Process P_DUMP_STATE at /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/internal/testpy/tb.vhd line 150
-# End time: 09:16:03 on Mar 13,2026, Elapsed time: 0:16:42
-# Errors: 0, Warnings: 1
+# No Design Loaded!
+add wave -position insertpoint  \
+vsim1:/tb/MyRiscv/iCLK \
+vsim1:/tb/MyRiscv/iRST \
+vsim1:/tb/MyRiscv/iInstLd \
+vsim1:/tb/MyRiscv/iInstAddr \
+vsim1:/tb/MyRiscv/iInstExt \
+vsim1:/tb/MyRiscv/oALUOut \
+vsim1:/tb/MyRiscv/s_DMemWr \
+vsim1:/tb/MyRiscv/s_DMemAddr \
+vsim1:/tb/MyRiscv/s_DMemData \
+vsim1:/tb/MyRiscv/s_DMemOut \
+vsim1:/tb/MyRiscv/s_RegWr \
+vsim1:/tb/MyRiscv/s_RegWrAddr \
+vsim1:/tb/MyRiscv/s_RegWrData \
+vsim1:/tb/MyRiscv/s_IMemAddr \
+vsim1:/tb/MyRiscv/s_PC \
+vsim1:/tb/MyRiscv/s_Inst \
+vsim1:/tb/MyRiscv/s_Halt \
+vsim1:/tb/MyRiscv/s_Ovfl \
+vsim1:/tb/MyRiscv/s_ALUsrc \
+vsim1:/tb/MyRiscv/s_ALUop \
+vsim1:/tb/MyRiscv/s_WBsel \
+vsim1:/tb/MyRiscv/s_Branch \
+vsim1:/tb/MyRiscv/s_jal \
+vsim1:/tb/MyRiscv/s_jalr \
+vsim1:/tb/MyRiscv/s_memsize \
+vsim1:/tb/MyRiscv/s_MemSign \
+vsim1:/tb/MyRiscv/s_Ors1 \
+vsim1:/tb/MyRiscv/s_Ors2 \
+vsim1:/tb/MyRiscv/s_Oext \
+vsim1:/tb/MyRiscv/s_DMemRD \
+vsim1:/tb/MyRiscv/s_ALUOut \
+vsim1:/tb/MyRiscv/s_ALUIn2 \
+vsim1:/tb/MyRiscv/s_ALUctl \
+vsim1:/tb/MyRiscv/s_Uext \
+vsim1:/tb/MyRiscv/s_isLUI \
+vsim1:/tb/MyRiscv/s_LoadOut \
+vsim1:/tb/MyRiscv/s_Inst_q \
+vsim1:/tb/MyRiscv/s_RegWrAddr_c \
+vsim1:/tb/MyRiscv/s_RegWrData_c \
+vsim1:/tb/MyRiscv/s_RegWr_c
+add wave -position insertpoint  \
+vsim2:/tb/MyRiscv/iCLK \
+vsim2:/tb/MyRiscv/iRST \
+vsim2:/tb/MyRiscv/iInstLd \
+vsim2:/tb/MyRiscv/iInstAddr \
+vsim2:/tb/MyRiscv/iInstExt \
+vsim2:/tb/MyRiscv/oALUOut \
+vsim2:/tb/MyRiscv/s_DMemWr \
+vsim2:/tb/MyRiscv/s_DMemAddr \
+vsim2:/tb/MyRiscv/s_DMemData \
+vsim2:/tb/MyRiscv/s_DMemOut \
+vsim2:/tb/MyRiscv/s_RegWr \
+vsim2:/tb/MyRiscv/s_RegWrAddr \
+vsim2:/tb/MyRiscv/s_RegWrData \
+vsim2:/tb/MyRiscv/s_IMemAddr \
+vsim2:/tb/MyRiscv/s_PC \
+vsim2:/tb/MyRiscv/s_Inst \
+vsim2:/tb/MyRiscv/s_Halt \
+vsim2:/tb/MyRiscv/s_Ovfl \
+vsim2:/tb/MyRiscv/s_ALUsrc \
+vsim2:/tb/MyRiscv/s_ALUop \
+vsim2:/tb/MyRiscv/s_WBsel \
+vsim2:/tb/MyRiscv/s_Branch \
+vsim2:/tb/MyRiscv/s_jal \
+vsim2:/tb/MyRiscv/s_jalr \
+vsim2:/tb/MyRiscv/s_memsize \
+vsim2:/tb/MyRiscv/s_MemSign \
+vsim2:/tb/MyRiscv/s_Ors1 \
+vsim2:/tb/MyRiscv/s_Ors2 \
+vsim2:/tb/MyRiscv/s_Oext \
+vsim2:/tb/MyRiscv/s_DMemRD \
+vsim2:/tb/MyRiscv/s_ALUOut \
+vsim2:/tb/MyRiscv/s_ALUIn2 \
+vsim2:/tb/MyRiscv/s_ALUctl \
+vsim2:/tb/MyRiscv/s_Uext \
+vsim2:/tb/MyRiscv/s_isLUI \
+vsim2:/tb/MyRiscv/s_LoadOut \
+vsim2:/tb/MyRiscv/s_RegWrAddr_c \
+vsim2:/tb/MyRiscv/s_RegWrData_c \
+vsim2:/tb/MyRiscv/s_RegWr_c
