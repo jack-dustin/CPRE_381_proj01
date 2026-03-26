@@ -176,13 +176,14 @@ end component;
           o_O  : out std_logic_vector(31 downto 0));
   end component;
 
-  -- component alu is
+  -- component proj01_ALU is
   --   generic(DATA_WIDTH : integer);
   --   port(
   --         i_A     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
   --         i_B     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
   --         i_ALUctl : in std_logic_vector(3 downto 0);   -- control bus for ALU operation (e.g., add, sub, and, or, etc.)
-  --         o_Y    : out std_logic_vector((DATA_WIDTH - 1) downto 0) -- ALU output determined by control signal
+  --         o_ALUout    : out std_logic_vector((DATA_WIDTH - 1) downto 0); -- ALU output determined by control signal
+  --         o_branchOut: out std_logic
   --   ); 
   -- end component;
 
@@ -218,6 +219,19 @@ s_Halt <= '1' when (iRST='0' and
 
 -- Gate register writes off during WFI (avoid std_logic and/not operator issues)
 ADD_SUBsel <= '1' when s_ALUop = ALU_SUB else '0';
+
+-- with s_ALUop select
+-- s_ALUctl <= 
+--   "0000" when ALU_ADD,
+--   "0001" when ALU_SUB,
+--   "0100" when ALU_SLL,
+--   "1000" when ALU_XOR,
+--   "1010" when ALU_SRL,
+--   "1011" when ALU_SRA,
+--   "1100" when ALU_OR,
+--   "1110" when ALU_AND,
+--   "0000" when others;
+
           
   -- TODO: This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
   with iInstLd select
@@ -304,14 +318,15 @@ ADD_SUBsel <= '1' when s_ALUop = ALU_SUB else '0';
               o_O  => s_ALUIn2  -- TODO: connect this to the second input of your ALU
              );
 
-  -- ALU: alu
+  -- ALU: proj01_ALU
   --   generic map(DATA_WIDTH => N)
   --   port map(
   --             i_A     => s_Ors1, -- rs1
   --             i_B     => s_ALUIn2, -- output of ALU input mux
   --             i_ALUctl => s_ALUop, -- control signal from control decoder for ALU operation
-  --             o_Y    => s_ALUOut  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
-  --            );
+  --             o_ALUout    => s_ALUOut,  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
+  --             o_branchOut => open -- TODO: ALU Branch output currently going to nothing
+  --           );
 
   -- ADD/ADDI bring-up: add only (no subtract yet)
 LAddsub: addSub
@@ -319,7 +334,7 @@ LAddsub: addSub
   port map(
     i_Da     => s_Ors1,     -- rs1
     i_Db     => s_ALUIn2,   -- rs2 or imm (from your mux)
-    nAdd_Sub => ADD_SUBsel,        -- force ADD for now
+    nAdd_Sub => ADD_SUBsel,        
     o_Sum    => s_ALUOut,
     o_Car    => open
   );
