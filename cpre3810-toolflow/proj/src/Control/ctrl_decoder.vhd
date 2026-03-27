@@ -124,8 +124,8 @@ begin
     ALU_SUB when (funct3="000" and funct7="0100000") else
     ALU_ADD when (funct3="000") else
     -- shifts/logic/compares
-    -- ALU_SLL  when (funct3="001") else
-    -- ALU_SLT  when (funct3="010") else
+    ALU_SLL  when (funct3="001") else
+    ALU_SLT  when (funct3="010") else
     ALU_SLTU when (funct3="011") else
     ALU_XOR  when (funct3="100") else
     ALU_SRA  when (funct3="101" and funct7="0100000") else
@@ -138,8 +138,8 @@ begin
   -- I-type ALU ops
   alu_i <=
     ALU_ADD  when funct3="000" else  -- addi
-    -- ALU_SLT  when funct3="010" else  -- slti
-    -- ALU_SLTU when funct3="011" else  -- sltiu
+    ALU_SLT  when funct3="010" else  -- slti
+    ALU_SLTU when funct3="011" else  -- sltiu
     ALU_XOR  when funct3="100" else  -- xori
     ALU_OR   when funct3="110" else  -- ori
     ALU_AND  when funct3="111" else  -- andi

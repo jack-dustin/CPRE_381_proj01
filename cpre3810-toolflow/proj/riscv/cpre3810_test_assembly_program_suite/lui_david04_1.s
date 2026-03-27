@@ -1,6 +1,8 @@
 # instruction: lui
 # loads a 20-bit imm into the upper 20 bits of a register
 
+
+
 # Test 1: overwrites register
 addi t0, x0, 67 # initializes t0 with 67
 lui t0, 0xBAD # shifts 12 imm bits, and gives 0x00BAD000

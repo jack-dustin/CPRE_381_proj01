@@ -14,11 +14,6 @@
 # //
 cd /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/output/lw_jbinstoc_test1.s
 add wave -position insertpoint  \
-vsim:/tb/CLK \
-vsim:/tb/reset \
-vsim:/tb/reset_done \
-vsim:/tb/alu_out
-add wave -position insertpoint  \
 vsim:/tb/MyRiscv/iCLK \
 vsim:/tb/MyRiscv/iRST \
 vsim:/tb/MyRiscv/iInstLd \
@@ -52,94 +47,37 @@ vsim:/tb/MyRiscv/s_DMemRD \
 vsim:/tb/MyRiscv/s_ALUOut \
 vsim:/tb/MyRiscv/s_ALUIn2 \
 vsim:/tb/MyRiscv/s_ALUctl \
-vsim:/tb/MyRiscv/s_Uext \
 vsim:/tb/MyRiscv/s_isLUI \
 vsim:/tb/MyRiscv/s_LoadOut \
-vsim:/tb/MyRiscv/s_Inst_q \
 vsim:/tb/MyRiscv/s_RegWrAddr_c \
 vsim:/tb/MyRiscv/s_RegWrData_c \
 vsim:/tb/MyRiscv/s_RegWr_c
-# Can't move the Now cursor.
-restart -f
-# No Design Loaded!
-add wave -position insertpoint  \
-vsim1:/tb/MyRiscv/iCLK \
-vsim1:/tb/MyRiscv/iRST \
-vsim1:/tb/MyRiscv/iInstLd \
-vsim1:/tb/MyRiscv/iInstAddr \
-vsim1:/tb/MyRiscv/iInstExt \
-vsim1:/tb/MyRiscv/oALUOut \
-vsim1:/tb/MyRiscv/s_DMemWr \
-vsim1:/tb/MyRiscv/s_DMemAddr \
-vsim1:/tb/MyRiscv/s_DMemData \
-vsim1:/tb/MyRiscv/s_DMemOut \
-vsim1:/tb/MyRiscv/s_RegWr \
-vsim1:/tb/MyRiscv/s_RegWrAddr \
-vsim1:/tb/MyRiscv/s_RegWrData \
-vsim1:/tb/MyRiscv/s_IMemAddr \
-vsim1:/tb/MyRiscv/s_PC \
-vsim1:/tb/MyRiscv/s_Inst \
-vsim1:/tb/MyRiscv/s_Halt \
-vsim1:/tb/MyRiscv/s_Ovfl \
-vsim1:/tb/MyRiscv/s_ALUsrc \
-vsim1:/tb/MyRiscv/s_ALUop \
-vsim1:/tb/MyRiscv/s_WBsel \
-vsim1:/tb/MyRiscv/s_Branch \
-vsim1:/tb/MyRiscv/s_jal \
-vsim1:/tb/MyRiscv/s_jalr \
-vsim1:/tb/MyRiscv/s_memsize \
-vsim1:/tb/MyRiscv/s_MemSign \
-vsim1:/tb/MyRiscv/s_Ors1 \
-vsim1:/tb/MyRiscv/s_Ors2 \
-vsim1:/tb/MyRiscv/s_Oext \
-vsim1:/tb/MyRiscv/s_DMemRD \
-vsim1:/tb/MyRiscv/s_ALUOut \
-vsim1:/tb/MyRiscv/s_ALUIn2 \
-vsim1:/tb/MyRiscv/s_ALUctl \
-vsim1:/tb/MyRiscv/s_Uext \
-vsim1:/tb/MyRiscv/s_isLUI \
-vsim1:/tb/MyRiscv/s_LoadOut \
-vsim1:/tb/MyRiscv/s_Inst_q \
-vsim1:/tb/MyRiscv/s_RegWrAddr_c \
-vsim1:/tb/MyRiscv/s_RegWrData_c \
-vsim1:/tb/MyRiscv/s_RegWr_c
-add wave -position insertpoint  \
-vsim2:/tb/MyRiscv/iCLK \
-vsim2:/tb/MyRiscv/iRST \
-vsim2:/tb/MyRiscv/iInstLd \
-vsim2:/tb/MyRiscv/iInstAddr \
-vsim2:/tb/MyRiscv/iInstExt \
-vsim2:/tb/MyRiscv/oALUOut \
-vsim2:/tb/MyRiscv/s_DMemWr \
-vsim2:/tb/MyRiscv/s_DMemAddr \
-vsim2:/tb/MyRiscv/s_DMemData \
-vsim2:/tb/MyRiscv/s_DMemOut \
-vsim2:/tb/MyRiscv/s_RegWr \
-vsim2:/tb/MyRiscv/s_RegWrAddr \
-vsim2:/tb/MyRiscv/s_RegWrData \
-vsim2:/tb/MyRiscv/s_IMemAddr \
-vsim2:/tb/MyRiscv/s_PC \
-vsim2:/tb/MyRiscv/s_Inst \
-vsim2:/tb/MyRiscv/s_Halt \
-vsim2:/tb/MyRiscv/s_Ovfl \
-vsim2:/tb/MyRiscv/s_ALUsrc \
-vsim2:/tb/MyRiscv/s_ALUop \
-vsim2:/tb/MyRiscv/s_WBsel \
-vsim2:/tb/MyRiscv/s_Branch \
-vsim2:/tb/MyRiscv/s_jal \
-vsim2:/tb/MyRiscv/s_jalr \
-vsim2:/tb/MyRiscv/s_memsize \
-vsim2:/tb/MyRiscv/s_MemSign \
-vsim2:/tb/MyRiscv/s_Ors1 \
-vsim2:/tb/MyRiscv/s_Ors2 \
-vsim2:/tb/MyRiscv/s_Oext \
-vsim2:/tb/MyRiscv/s_DMemRD \
-vsim2:/tb/MyRiscv/s_ALUOut \
-vsim2:/tb/MyRiscv/s_ALUIn2 \
-vsim2:/tb/MyRiscv/s_ALUctl \
-vsim2:/tb/MyRiscv/s_Uext \
-vsim2:/tb/MyRiscv/s_isLUI \
-vsim2:/tb/MyRiscv/s_LoadOut \
-vsim2:/tb/MyRiscv/s_RegWrAddr_c \
-vsim2:/tb/MyRiscv/s_RegWrData_c \
-vsim2:/tb/MyRiscv/s_RegWr_c
+add wave -position end  vsim:/tb/MyRiscv/DMem/q
+add wave -position end  vsim:/tb/MyRiscv/DMem/we
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/i_memVal
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/c_addr_2bit
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/c_funct3
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/o_LoadOut
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_ex
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_00
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_01
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_10
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_11
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_mux_byte_out
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_hw_0
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_hw_1
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_mux_hw_out
+add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_mux_b_hw_out
+add wave -position end  vsim:/tb/MyRiscv/Imm0/i_instr
+add wave -position end  vsim:/tb/MyRiscv/Imm0/o_imm
+add wave -position end  vsim:/tb/MyRiscv/Imm0/opcode
+add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_i
+add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_s
+add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_u
+add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_b
+add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_j
+# ** Error: (vish-7) Failed to open info file "/home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/containers/sim_container_0/work/_info" in read mode.
+# No such file or directory. (errno = ENOENT)
+add wave -position end  vsim:/tb/MyRiscv/DMem/data
+add wave -position end  vsim:/tb/MyRiscv/IMem/data
+add wave -position end  vsim:/tb/MyRiscv/DMem/data

@@ -1,6 +1,6 @@
 QuestaSim-64 vcom 2025.1_2 Compiler 2025.04 Apr  7 2025
-Start time: 09:47:56 on Mar 25,2026
-vcom -2008 -work internal/ModelSimContainer/work proj/src/RISCV_types.vhd internal/testpy/tb.vhd proj/src/RISCV_types.vhd proj/src/TopLevel/mem.vhd proj/src/TopLevel/RISCV_Processor.vhd proj/src/LogicGates/org2.vhd proj/src/LogicGates/andg2.vhd proj/src/LogicGates/mux2t1_N.vhd proj/src/LogicGates/mux2t1.vhd proj/src/LogicGates/xorg2.vhd proj/src/LogicGates/invg.vhd proj/src/Fetch/proj1_fetch.vhd proj/src/Fetch/basic_adder.vhd proj/src/Fetch/basic_adder_n.vhd proj/src/Fetch/busMux_2t1.vhd proj/src/Imm_Gen/imm_gen.vhd proj/src/Extenders/extenders.vhd proj/src/Extenders/extender_U20b.vhd proj/src/Control/ctrl_decoder.vhd proj/src/ALU/proj01_SLT.vhd proj/src/ALU/busMux_4t1.vhd proj/src/ALU/or_ALU.vhd proj/src/ALU/basic_adder_n_BRANCH.vhd proj/src/ALU/xor_N.vhd proj/src/ALU/proj01_BEQ.vhd proj/src/ALU/and_N.vhd proj/src/ALU/proj01_ALU.vhd proj/src/ALU/xor_ALU.vhd proj/src/ALU/tb_proj01_ALU.vhd proj/src/ALU/proj01_branchWrap.vhd proj/src/ALU/addSub.vhd proj/src/ALU/ones_comp_N.vhd proj/src/ALU/addSub_BRANCH.vhd proj/src/ALU/shifter.vhd proj/src/ALU/or_N.vhd proj/src/ALU/and_ALU.vhd proj/src/Datapath/MySecondDataPath.vhd proj/src/Datapath/Lab2_DataPath1 _for2.vhd proj/src/Load/proj01_LOAD.vhd proj/src/RegisterFile/mux_32t1_package.vhd proj/src/RegisterFile/dffg.vhd proj/src/RegisterFile/decoder_5t32.vhd proj/src/RegisterFile/reg_n.vhd proj/src/RegisterFile/mux_32t1.vhd proj/src/RegisterFile/reg_file.vhd 
+Start time: 10:02:12 on Mar 27,2026
+vcom -2008 -work internal/ModelSimContainer/work proj/src/RISCV_types.vhd internal/testpy/tb.vhd proj/src/RISCV_types.vhd proj/src/TopLevel/mem.vhd proj/src/TopLevel/RISCV_Processor.vhd proj/src/LogicGates/org2.vhd proj/src/LogicGates/andg2.vhd proj/src/LogicGates/mux2t1_N.vhd proj/src/LogicGates/mux2t1.vhd proj/src/LogicGates/xorg2.vhd proj/src/LogicGates/invg.vhd proj/src/Fetch/proj1_fetch.vhd proj/src/Fetch/basic_adder.vhd proj/src/Fetch/basic_adder_n.vhd proj/src/Fetch/busMux_2t1.vhd proj/src/Imm_Gen/imm_gen.vhd proj/src/Extenders/extenders.vhd proj/src/Extenders/extender_U20b.vhd proj/src/Control/ctrl_decoder.vhd proj/src/ALU/busMux_8t1.vhd proj/src/ALU/proj01_SLT.vhd proj/src/ALU/busMux_4t1.vhd proj/src/ALU/or_ALU.vhd proj/src/ALU/basic_adder_n_BRANCH.vhd proj/src/ALU/xor_N.vhd proj/src/ALU/proj01_BEQ.vhd proj/src/ALU/and_N.vhd proj/src/ALU/proj01_ALU.vhd proj/src/ALU/xor_ALU.vhd proj/src/ALU/tb_proj01_ALU.vhd proj/src/ALU/proj01_branchWrap.vhd proj/src/ALU/addSub.vhd proj/src/ALU/ones_comp_N.vhd proj/src/ALU/addSub_BRANCH.vhd proj/src/ALU/shifter.vhd proj/src/ALU/or_N.vhd proj/src/ALU/and_ALU.vhd proj/src/Datapath/MySecondDataPath.vhd proj/src/Datapath/Lab2_DataPath1 _for2.vhd proj/src/Load/proj01_LOAD.vhd proj/src/RegisterFile/mux_32t1_package.vhd proj/src/RegisterFile/dffg.vhd proj/src/RegisterFile/decoder_5t32.vhd proj/src/RegisterFile/reg_n.vhd proj/src/RegisterFile/mux_32t1.vhd proj/src/RegisterFile/reg_file.vhd 
 -- Loading package STANDARD
 -- Loading package TEXTIO
 -- Loading package std_logic_1164
@@ -22,7 +22,6 @@ vcom -2008 -work internal/ModelSimContainer/work proj/src/RISCV_types.vhd intern
 -- Loading package RISCV_types
 -- Compiling entity RISCV_Processor
 -- Compiling architecture structure of RISCV_Processor
--- Loading entity reg_n
 -- Compiling entity org2
 -- Compiling architecture dataflow of org2
 -- Compiling entity andg2
@@ -37,21 +36,7 @@ vcom -2008 -work internal/ModelSimContainer/work proj/src/RISCV_types.vhd intern
 -- Compiling architecture dataflow of invg
 -- Compiling entity proj1_fetch
 -- Compiling architecture structural of proj1_fetch
--- Compiling entity basic_adder
--- Compiling architecture structural of basic_adder
--- Compiling entity basic_adder_n
--- Compiling architecture structural of basic_adder_n
--- Compiling entity busMux_2t1
--- Compiling architecture dataflow of busMux_2t1
--- Compiling entity imm_gen
--- Compiling architecture dataflow of imm_gen
--- Compiling entity extenders
--- Compiling architecture dataflow of extenders
--- Compiling entity extender_20b
--- Compiling architecture dataflow of extender_20b
--- Compiling entity ctrl_decoder
--- Compiling architecture dataflow of ctrl_decoder
-** Error: proj/src/Control/ctrl_decoder.vhd(156): (vcom-1136) Unknown identifier "ALU_COPY_B".
-** Note: proj/src/Control/ctrl_decoder.vhd(173): VHDL Compiler exiting
-End time: 09:47:56 on Mar 25,2026, Elapsed time: 0:00:00
+** Error: proj/src/Fetch/proj1_fetch.vhd(77): (vcom-1136) Unknown identifier "iCLK".
+** Note: proj/src/Fetch/proj1_fetch.vhd(103): VHDL Compiler exiting
+End time: 10:02:12 on Mar 27,2026, Elapsed time: 0:00:00
 Errors: 1, Warnings: 2

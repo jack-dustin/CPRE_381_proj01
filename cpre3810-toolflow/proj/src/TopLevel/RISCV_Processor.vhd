@@ -209,8 +209,8 @@ begin
  
   oALUOut     <= s_ALUOut;             -- drive top-level output
   -- ===== ADD/ADDI bring-up: tie off unused data memory inputs =====
-  -- s_DMemAddr <= s_ALUOut;   -- effective address from ALU
-  -- s_DMemData <= s_Ors2;     -- store data from rs2
+   s_DMemAddr <= s_ALUOut;   -- effective address from ALU
+   s_DMemData <= s_Ors2;     -- store data from rs2
  -- WFI detect: opcode=1110011, funct3=000, imm12=0x105
 -- Only treat it as HALT when we're EXECUTING (not loading IMem, not in reset)
 -- WFI detect (SYSTEM opcode 1110011, funct3=000, imm12=0x105)
@@ -241,8 +241,8 @@ s_RegWrData <= s_RegWrData_c;
     "0000" when ALU_ADD,  -- add / addi / lw / sw address calc
     "0001" when ALU_SUB,  -- sub
     "0100" when ALU_SLL,  -- shift left logical
-    --"0010" when ALU_SLT,  -- set less than
-    
+    "0010" when ALU_SLT,  -- set less than
+    --""     when ALU_SLTU,
     "1000" when ALU_XOR,  -- xor
     "1010" when ALU_SRL,  -- shift right logical
     "1011" when ALU_SRA,  -- shift right arithmetic
@@ -353,16 +353,7 @@ s_RegWrData <= s_RegWrData_c;
 --     o_Q   => s_RegWrAddr
 --   );
 
--- -- data commit register (32-bit)
--- WD_COMMIT: entity work.reg_n
---   generic map(N => N)
---   port map(
---     i_CLK => iCLK,
---     i_RST => iRST,
---     i_WE  => '1',
---     i_D   => s_RegWrData_c,
---     o_Q   => s_RegWrData
---   );
+
 
 --   -- ADD/ADDI bring-up: add only (no subtract yet)
 -- LAddsub: addSub

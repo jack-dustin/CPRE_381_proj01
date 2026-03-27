@@ -58,7 +58,7 @@ architecture structural of proj1_fetch is
     -- (instantiate components)
     -- Component => Entity Ports/Signals
     begin   
-        s_CLK_n <= not i_CLK;
+        --s_CLK_n <= not i_CLK;
 
         -- Choose between "PC + 4" and "PC + imm"
         INST_BUSMUX_1: busMux_2t1
@@ -74,7 +74,7 @@ architecture structural of proj1_fetch is
                  o_dOUT     => os_busMux2);     -- Output final result to PC Register
 
         INST_REG_N: reg_n
-        port map(i_CLK  => s_CLK_n,
+        port map(i_CLK  => i_CLK,
                  i_RST  => '0',             -- Prevent register from going to 0x0000.0000 
                  i_WE   => '1',             -- Should always be 1
                  i_D    => os_busMux2,      -- Input from busMux
