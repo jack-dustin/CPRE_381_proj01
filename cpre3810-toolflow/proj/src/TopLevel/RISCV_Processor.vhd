@@ -236,19 +236,30 @@ s_RegWrData <= s_RegWrData_c;
 
 -- Gate register writes off during WFI (avoid std_logic and/not operator issues)
 
-  with s_ALUop select
-  s_ALUctl <=
-    "0000" when ALU_ADD,  -- add / addi / lw / sw address calc
-    "0001" when ALU_SUB,  -- sub
-    "0100" when ALU_SLL,  -- shift left logical
-    "0010" when ALU_SLT,  -- set less than
-    --""     when ALU_SLTU,
-    "1000" when ALU_XOR,  -- xor
-    "1010" when ALU_SRL,  -- shift right logical
-    "1011" when ALU_SRA,  -- shift right arithmetic
-    "1100" when ALU_OR,   -- or
-    "1110" when ALU_AND,  -- and
-    "0000" when others;
+  -- with s_ALUop select
+  -- s_ALUctl <=
+  --   "0000" when ALU_ADD,  -- add / addi / lw / sw address calc
+  --   "0001" when ALU_SUB,  -- sub
+  --   "0100" when ALU_SLL,  -- shift left logical
+  --   "0010" when ALU_SLT,  -- set less than
+  --   --""     when ALU_SLTU,
+  --   "1000" when ALU_XOR,  -- xor
+  --   "1010" when ALU_SRL,  -- shift right logical
+  --   "1011" when ALU_SRA,  -- shift right arithmetic
+  --   "1100" when ALU_OR,   -- or
+  --   "1110" when ALU_AND,  -- and
+  --   "0000" when others;
+  -- proj01_ALU expects i_ALUctl bits to match instruction fields:
+-- (3)=funct3(1)=instr(13), (2)=funct3(2)=instr(14), (1)=funct3(0)=instr(12), (0)=funct7(5)=instr(30)
+
+  s_ALUctl(3) <= s_Inst(13);
+  s_ALUctl(2) <= s_Inst(14);
+  s_ALUctl(1) <= s_Inst(12);
+
+  -- Only use instr(30) for SUB (R-type funct7=0100000) and for SRAI/SRA (shift-right arithmetic)
+  s_ALUctl(0) <= s_Inst(30) when (s_Inst(6 downto 0)=OP_RTYPE) or
+                              (s_Inst(6 downto 0)=OP_ITYPE and s_Inst(14 downto 12)="101")
+                else '0';
     
   -- TODO: This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
   with iInstLd select

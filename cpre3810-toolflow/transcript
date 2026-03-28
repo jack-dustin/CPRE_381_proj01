@@ -12,7 +12,7 @@
 # // of the Customer's facilities without the express written permission of SISW,
 # // and may not be used in any way not expressly authorized by SISW.
 # //
-cd /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/output/lw_jbinstoc_test1.s
+cd /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/output/xori_jrd81_0.s
 add wave -position insertpoint  \
 vsim:/tb/MyRiscv/iCLK \
 vsim:/tb/MyRiscv/iRST \
@@ -52,32 +52,26 @@ vsim:/tb/MyRiscv/s_LoadOut \
 vsim:/tb/MyRiscv/s_RegWrAddr_c \
 vsim:/tb/MyRiscv/s_RegWrData_c \
 vsim:/tb/MyRiscv/s_RegWr_c
-add wave -position end  vsim:/tb/MyRiscv/DMem/q
-add wave -position end  vsim:/tb/MyRiscv/DMem/we
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/i_memVal
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/c_addr_2bit
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/c_funct3
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/o_LoadOut
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_ex
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_00
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_01
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_10
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_byte_11
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_mux_byte_out
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_hw_0
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_hw_1
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_mux_hw_out
-add wave -position end  vsim:/tb/MyRiscv/LOAD0/s_mux_b_hw_out
-add wave -position end  vsim:/tb/MyRiscv/Imm0/i_instr
-add wave -position end  vsim:/tb/MyRiscv/Imm0/o_imm
-add wave -position end  vsim:/tb/MyRiscv/Imm0/opcode
-add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_i
-add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_s
-add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_u
-add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_b
-add wave -position end  vsim:/tb/MyRiscv/Imm0/imm_j
-# ** Error: (vish-7) Failed to open info file "/home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/containers/sim_container_0/work/_info" in read mode.
-# No such file or directory. (errno = ENOENT)
-add wave -position end  vsim:/tb/MyRiscv/DMem/data
-add wave -position end  vsim:/tb/MyRiscv/IMem/data
-add wave -position end  vsim:/tb/MyRiscv/DMem/data
+add wave -position end  vsim:/tb/MyRiscv/ALU0/i_A
+add wave -position end  vsim:/tb/MyRiscv/ALU0/i_B
+add wave -position end  vsim:/tb/MyRiscv/ALU0/i_ALUctl
+add wave -position end  vsim:/tb/MyRiscv/ALU0/o_ALUout
+add wave -position end  vsim:/tb/MyRiscv/ALU0/o_branchOut
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_funct3_fix
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_andOUT
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_xorOUT
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_orOUT
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_shiftOUT
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_AddSubOUT
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_sltOUT
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_sltuOUT
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_NOR_t_mux
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_ORm_t_Fm
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_nAddSub_nTa
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_nAddSub_aTo1
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_nAddSub_aTo2
+add wave -position end  vsim:/tb/MyRiscv/ALU0/sc_nAddSub
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_MSB_Cin
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_MSB_Cout
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_Mux_0t2
+add wave -position end  vsim:/tb/MyRiscv/ALU0/s_Mux_1t2
