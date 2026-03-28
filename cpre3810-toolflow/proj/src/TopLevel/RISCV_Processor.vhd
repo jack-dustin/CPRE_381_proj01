@@ -364,30 +364,7 @@ s_RegWrData <= s_RegWrData_c;
     o_branchOut => s_brTaken
   );
 
---   -- rd commit register (5-bit)
--- RD_COMMIT: entity work.reg_n
---   generic map(N => 5)
---   port map(
---     i_CLK => iCLK,
---     i_RST => iRST,
---     i_WE  => '1',
---     i_D   => s_RegWrAddr_c,
---     o_Q   => s_RegWrAddr
---   );
 
-
-
---   -- ADD/ADDI bring-up: add only (no subtract yet)
--- LAddsub: addSub
---   generic map(N => N)
---   port map(
---     i_Da     => s_Ors1,     -- rs1
---     i_Db     => s_ALUIn2,   -- rs2 or imm (from your mux)
---     nAdd_Sub => ADD_SUBsel,        -- force ADD for now
---     o_Sum    => s_ALUOut,
---     o_Car    => open
---   );
---   -- write back to regfile mux
 
   AND0: andg2
     port map (
