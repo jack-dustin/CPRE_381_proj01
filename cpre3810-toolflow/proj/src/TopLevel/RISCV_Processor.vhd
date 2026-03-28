@@ -107,6 +107,9 @@ architecture structure of RISCV_Processor is
    signal s_RegWrData_c : std_logic_vector(N-1 downto 0);
    signal s_RegWr_c     : std_logic;
 
+   signal s_brTaken : std_logic;
+   signal s_Fetchsrc : std_logic;
+
 
    
   component mem is
@@ -191,8 +194,15 @@ end component;
           i_A     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
           i_B     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
           i_ALUctl : in std_logic_vector(3 downto 0);   -- control bus for ALU operation (e.g., add, sub, and, or, etc.)
-          o_ALUout    : out std_logic_vector((DATA_WIDTH - 1) downto 0) -- ALU output determined by control signal
+          o_ALUout    : out std_logic_vector((DATA_WIDTH - 1) downto 0); -- ALU output determined by control signal
+          o_branchOut: out std_logic
     ); 
+  end component;
+
+  component andg2 is
+    port(i_A          : in std_logic;
+       i_B          : in std_logic;
+       o_F          : out std_logic);
   end component;
 
   component proj01_LOAD is
@@ -295,7 +305,7 @@ s_RegWrData <= s_RegWrData_c;
     i_CLK    => iCLK,
     i_RST_PC => iRST,
     i_imm    => s_Oext,   -- from your extenders output (sign-extended imm)
-    c_PC_add => '0',      -- for now: always PC+4
+    c_PC_add => s_Fetchsrc,      -- for now: always PC+4
     o_PC     => s_PC
   );
   CDec: ctrl_decoder
@@ -350,7 +360,8 @@ s_RegWrData <= s_RegWrData_c;
     i_A     => s_Ors1, -- rs1
     i_B     => s_ALUIn2, -- output of ALU input mux
     i_ALUctl => s_ALUctl, -- control signal from control decoder for ALU operation
-    o_ALUout    => s_ALUOut  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
+    o_ALUout    => s_ALUOut,  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
+    o_branchOut => s_brTaken
   );
 
 --   -- rd commit register (5-bit)
@@ -377,6 +388,12 @@ s_RegWrData <= s_RegWrData_c;
 --     o_Car    => open
 --   );
 --   -- write back to regfile mux
+
+  AND0: andg2
+    port map (
+      i_A  => s_Branch,
+      i_B  => s_brTaken,
+      o_F  => s_Fetchsrc);
 
 -- implement load functionality
 

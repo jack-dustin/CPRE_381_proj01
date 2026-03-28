@@ -35,7 +35,7 @@ architecture dataflow of ctrl_decoder is
   
 
   -- opcode class flags
-  signal is_rtype, is_itype, is_lui, is_load, is_store: std_logic; --, , , is_b, , is_u_auipc : std_logic;
+  signal is_rtype, is_itype, is_lui, is_load, is_store, is_b: std_logic; --, , , is_b, , is_u_auipc : std_logic;
   
 
   -- ALU op candidates
@@ -60,7 +60,7 @@ begin
   is_itype   <= '1' when opcode = OP_ITYPE  else '0';
   is_load    <= '1' when opcode = OP_LOAD   else '0';
   is_store   <= '1' when opcode = OP_STORE  else '0';
-  -- is_b       <= '1' when opcode = OP_BRANCH else '0';
+  is_b       <= '1' when opcode = OP_BRANCH else '0';
 
   -- is_jal     <= '1' when opcode = OP_JAL    else '0';
   -- is_jalr    <= '1' when opcode = OP_JALR   else '0';
@@ -80,9 +80,7 @@ begin
   mem_we  <= '1' when is_store='1' else '0';
   mem_re  <= '1' when is_load='1'  else '0';
   
-  is_branch <= '0';
-  is_jal    <= '0';
-  is_jalr   <= '0';
+  
   mem_sign  <= '1';
 
   -- is_branch <= is_b;
@@ -122,8 +120,8 @@ begin
     ALU_ADD when (funct3="000") else
     -- shifts/logic/compares
     ALU_SLL  when (funct3="001") else
-    -- ALU_SLT  when (funct3="010") else
-    -- ALU_SLTU when (funct3="011") else
+    ALU_SLT  when (funct3="010") else
+    ALU_SLTU when (funct3="011") else
     ALU_XOR  when (funct3="100") else
     ALU_SRA  when (funct3="101" and funct7="0100000") else
     ALU_SRL  when (funct3="101") else
@@ -159,8 +157,13 @@ begin
   --   alu_u      when (is_u_lui='1' or is_u_auipc='1') else
   --   ALU_ADD;
 
+  is_branch <= is_b;
+
   alu_op <= alu_r when is_rtype='1' else
           alu_i when is_itype='1' else
-          ALU_ADD;
+          ALU_ADD when is_load ='1' else
+          ALU_SUB when is_b = '1' else
+          ALU_ADD
+          ;
 
 end architecture;
