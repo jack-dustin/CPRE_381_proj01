@@ -3,16 +3,14 @@ Reading pref.tcl
 # 2025.1_2
 
 # vsim -postsimdataflow -debugdb -c -voptargs=""+acc"" tb -do "modelsim_framework.do" -gOUTPUT_TRACE=ms.trace 
-# Start time: 14:09:15 on Mar 26,2026
+# Start time: 14:31:44 on Mar 28,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
 # ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility. The +acc switch would be deprecated in a future release.
-# ** Warning: ../../proj/src/ALU/proj01_ALU.vhd(249): (vopt-3473) Component instance "INST_BUSMUX_8t1 : busMux_8t1" is not bound.
-#         Region: /tb/MyRiscv/ALU0
 # ** Warning: ../../proj/src/ALU/proj01_branchWrap.vhd(102): (vopt-3473) Component instance "INST_MUX_4t1 : mux4t1" is not bound.
 #         Region: /tb/MyRiscv/ALU0/INST_BRANCH_WRAPPER
 # ** Note: (vopt-4301) Memory core inferred for signal 'ram' width=32, depth=1024, type=RAM at location proj/src/TopLevel/mem.vhd:35
-# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=3.
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=2.
 # //  Questa Sim-64
 # //  Version 2025.1_2 linux_x86_64 Apr  7 2025
 # //
@@ -67,8 +65,8 @@ Reading pref.tcl
 # Loading work.addsub_branch(structural)#1
 # Loading work.basic_adder_n_branch(structural)#1
 # Loading work.proj01_slt(structural)#1
-# ** Warning: (vsim-3473) Component instance "INST_BUSMUX_8t1 : busMux_8t1" is not bound.
-#    Time: 0 ns  Iteration: 0  Instance: /tb/MyRiscv/ALU0 File: /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/proj/src/ALU/proj01_ALU.vhd
+# Loading work.busmux_8t1(structural)#1
+# Loading work.busmux_4t1(structural)#1
 # Loading work.proj01_branchwrap(structural)#1
 # Loading work.proj01_beq(structural)#1
 # Loading work.and_n(structural)#2
@@ -78,30 +76,32 @@ Reading pref.tcl
 # ** Warning: (vsim-3473) Component instance "INST_MUX_4t1 : mux4t1" is not bound.
 #    Time: 0 ns  Iteration: 0  Instance: /tb/MyRiscv/ALU0/INST_BRANCH_WRAPPER File: /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/proj/src/ALU/proj01_branchWrap.vhd
 # Loading work.proj01_load(structural)#1
-# Loading work.busmux_4t1(structural)#1
+# ** Warning: (vsim-8683) Uninitialized out port /tb/MyRiscv/CDec/is_branch has no driver.
+# This port will contribute value (U) to the signal network.
+# ** Warning: (vsim-8683) Uninitialized out port /tb/MyRiscv/CDec/is_jal has no driver.
+# This port will contribute value (U) to the signal network.
+# ** Warning: (vsim-8683) Uninitialized out port /tb/MyRiscv/CDec/is_jalr has no driver.
+# This port will contribute value (U) to the signal network.
 # ** Warning: (vsim-8684) No drivers exist on out port /tb/MyRiscv/ALU0/INST_BRANCH_WRAPPER/o_out, and its initial value is not used.
 # Therefore, simulation behavior may occur that is not in compliance with
 # the VHDL standard as the initial values come from the base signal /tb/MyRiscv/ALU0/o_branchOut.
-# ** Warning: (vsim-8684) No drivers exist on out port /tb/MyRiscv/ALU0/o_ALUout(31 downto 2), and its initial value is not used.
-# Therefore, simulation behavior may occur that is not in compliance with
-# the VHDL standard as the initial values come from the base signal /tb/MyRiscv/s_ALUOut(31 downto 2).
-# ** Warning: (vsim-8684) No drivers exist on out port /tb/MyRiscv/ALU0/o_ALUout(1), and its initial value is not used.
-# Therefore, simulation behavior may occur that is not in compliance with
-# the VHDL standard as the initial values come from the base signal /tb/MyRiscv/s_ALUOut(1).
-# ** Warning: (vsim-8684) No drivers exist on out port /tb/MyRiscv/ALU0/o_ALUout(0), and its initial value is not used.
-# Therefore, simulation behavior may occur that is not in compliance with
-# the VHDL standard as the initial values come from the base signal /tb/MyRiscv/s_ALUOut(0).
 # ** Note: (vsim-8900) Creating design debug database vsim.dbg.
 # do modelsim_framework.do
 # ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 #    Time: 0 ns  Iteration: 0  Instance: /tb/MyRiscv/DMem
 # ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 #    Time: 0 ns  Iteration: 0  Instance: /tb/MyRiscv/IMem
-# ** Note: Data structure takes 56588048 bytes of memory
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 0 ns  Iteration: 6  Instance: /tb/MyRiscv/DMem
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 5 ns  Iteration: 14  Instance: /tb/MyRiscv/DMem
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 5 ns  Iteration: 15  Instance: /tb/MyRiscv/DMem
+# ** Note: Data structure takes 56850216 bytes of memory
 #          Process time 0.06 seconds
 #          stop
-#    Time: 1980 ns  Iteration: 1  Instance: /tb
+#    Time: 2 us  Iteration: 1  Instance: /tb
 # Break in Process P_DUMP_STATE at /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/internal/testpy/tb.vhd line 150
 # Stopped at /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/internal/testpy/tb.vhd line 150
-# End time: 14:09:16 on Mar 26,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 11
+# End time: 14:31:45 on Mar 28,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 12
