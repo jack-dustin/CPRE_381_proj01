@@ -12,7 +12,11 @@
 # // of the Customer's facilities without the express written permission of SISW,
 # // and may not be used in any way not expressly authorized by SISW.
 # //
+<<<<<<< HEAD
 cd /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/output/add_derajb_1.s
+=======
+cd /home/jrd81/CPRE_381_proj01/CPRE_381_proj01/cpre3810-toolflow/output/beq_nrudrud_1.s
+>>>>>>> top-level-integration
 add wave -position insertpoint  \
 vsim:/tb/MyRiscv/iCLK \
 vsim:/tb/MyRiscv/iRST \
@@ -46,4 +50,15 @@ vsim:/tb/MyRiscv/s_Oext \
 vsim:/tb/MyRiscv/s_DMemRD \
 vsim:/tb/MyRiscv/s_ALUOut \
 vsim:/tb/MyRiscv/s_ALUIn2 \
+<<<<<<< HEAD
 vsim:/tb/MyRiscv/ADD_SUBsel
+=======
+vsim:/tb/MyRiscv/s_ALUctl \
+vsim:/tb/MyRiscv/s_isLUI \
+vsim:/tb/MyRiscv/s_LoadOut \
+vsim:/tb/MyRiscv/s_RegWrAddr_c \
+vsim:/tb/MyRiscv/s_RegWrData_c \
+vsim:/tb/MyRiscv/s_RegWr_c \
+vsim:/tb/MyRiscv/s_brTaken \
+vsim:/tb/MyRiscv/s_take_pc_imm
+>>>>>>> top-level-integration

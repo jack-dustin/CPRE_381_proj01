@@ -35,63 +35,67 @@ architecture dataflow of ctrl_decoder is
   
 
   -- opcode class flags
-  signal is_rtype, is_itype : std_logic;--, is_load, is_store, is_b, is_u_lui, is_u_auipc : std_logic;
+  signal is_rtype, is_itype, is_lui, is_load, is_store, is_branch_op, is_jal_op, is_jalr_op: std_logic; --, , , is_b, , is_u_auipc : std_logic;
   
 
   -- ALU op candidates
   signal alu_r : alu_op_t;
   -- signal alu_r_m    : alu_op_t;
   signal alu_i      : alu_op_t;
-  -- signal alu_ldst   : alu_op_t;
-  -- signal alu_u      : alu_op_t;
+  signal alu_ldst   : alu_op_t;
+  signal alu_u      : alu_op_t;
+
+  
   
 begin
+
+  is_branch <= is_branch_op;
+  is_jal    <= is_jal_op;
+  is_jalr   <= is_jalr_op;
+
+
+
   opcode <= instr(6 downto 0);
   funct3 <= instr(14 downto 12);
   funct7 <= instr(31 downto 25);
-  mem_we <= '0';
-
-  mem_re <= '0';
-
-  wb_sel <= WB_ALU;
-
-  is_branch <= '0';
-  is_jal    <= '0';
-  is_jalr   <= '0';
-
-  mem_sign <= '1';
+  
   -- classify opcodes
   is_rtype   <= '1' when opcode = OP_RTYPE  else '0';
   is_itype   <= '1' when opcode = OP_ITYPE  else '0';
-  -- is_load    <= '1' when opcode = OP_LOAD   else '0';
-  -- is_store   <= '1' when opcode = OP_STORE  else '0';
-  -- is_b       <= '1' when opcode = OP_BRANCH else '0';
+  is_load    <= '1' when opcode = OP_LOAD   else '0';
+  is_store   <= '1' when opcode = OP_STORE  else '0';
+  is_branch_op  <= '1' when opcode = OP_BRANCH else '0';
 
-  -- is_jal     <= '1' when opcode = OP_JAL    else '0';
-  -- is_jalr    <= '1' when opcode = OP_JALR   else '0';
+  is_jal_op     <= '1' when opcode = OP_JAL    else '0';
+  is_jalr_op    <= '1' when opcode = OP_JALR   else '0';
 
-  -- is_u_lui   <= '1' when opcode = OP_LUI    else '0';
-  -- is_u_auipc <= '1' when opcode = OP_AUIPC  else '0';
+  is_lui   <= '1' when opcode = OP_LUI    else '0';
+  -- is_auipc <= '1' when opcode = OP_AUIPC  else '0';
 
 
-  ---------------------------------------------------------------------------
-  -- Main controls (pure combinational / dataflow)
-  ---------------------------------------------------------------------------
-  reg_we  <= '1' when (is_rtype='1' or is_itype='1') --or is_load='1' or is_jal='1' or is_jalr='1' or is_u_lui='1' or is_u_auipc='1')
+  reg_we  <= '1' when (is_rtype='1' or is_itype='1' or is_load='1' or is_jal_op='1' or is_jalr_op='1' or is_lui='1') -- or is_auipc
+              else '0';
+
+  --reg_we <= '1' when (is_rtype='1' or is_itype='1' or is_lui='1' or is_load='1') else '0';
+
+  alu_src <= '1' when (is_itype='1'or is_load='1' or is_store='1' or is_jalr_op='1') -- or is_u_auipc='1')
              else '0';
 
-  alu_src <= '1' when (is_itype='1') --or is_load='1' or is_store='1' or is_jalr='1' or is_u_lui='1' or is_u_auipc='1')
-             else '0';
+  mem_we  <= '1' when is_store='1' else '0';
+  mem_re  <= '1' when is_load='1'  else '0';
+  
+  
+  mem_sign  <= '1';
 
-  -- mem_we  <= '1' when is_store='1' else '0';
-  -- mem_re  <= '1' when is_load='1'  else '0';
-
-  -- is_branch <= is_b;
+  -- is_branch_op <= is_b;
 
   -- Writeback select
-  -- wb_sel <= WB_MEM when is_load='1' else
-  --           WB_PC4 when (is_jal='1' or is_jalr='1') else
-  --           wb_sel <=  WB_ALU;
+   wb_sel <= WB_MEM when is_load='1' else
+            WB_PC4 when (is_jal_op='1' or is_jalr_op='1') else
+            WB_ALU;
+
+    -- wb_sel <= WB_MEM when is_load='1' else
+    --           WB_ALU;
 
   ---------------------------------------------------------------------------
   -- mem_size + mem_sign (loads/stores)
@@ -129,18 +133,7 @@ begin
     ALU_AND  when (funct3="111") else
     ALU_ADD;
 
-  -- -- R-type M extension (funct7=0000001)
-  -- alu_r_m <=
-  --   ALU_MUL    when funct3="000" else
-  --   ALU_MULH   when funct3="001" else
-  --   ALU_MULHSU when funct3="010" else
-  --   ALU_MULHU  when funct3="011" else
-  --   ALU_DIV    when funct3="100" else
-  --   ALU_DIVU   when funct3="101" else
-  --   ALU_REM    when funct3="110" else
-  --   ALU_REMU   when funct3="111" else
-  --   ALU_MUL;
-
+  
   -- I-type ALU ops
   alu_i <=
     ALU_ADD  when funct3="000" else  -- addi
@@ -155,23 +148,21 @@ begin
     ALU_ADD;
 
   -- -- Loads/stores/jalr use address add
-  -- alu_ldst <= ALU_ADD;
+  alu_ldst <= ALU_ADD;
 
   -- -- U-type
-  -- alu_u <=
-  --   ALU_COPY_B when is_u_lui='1' else  -- LUI: rd = imm_u (wired as B in top-level)
-  --   ALU_ADD;                           -- AUIPC: rd = pc + imm_u (A=pc in top-level)
+  alu_u <= ALU_ADD;                           -- AUIPC: rd = pc + imm_u (A=pc in top-level)
 
-  -- -- Final ALU op select by opcode class
-  -- alu_op <=
-  --   alu_r_base when (is_rtype='1') else
-  --   alu_i      when (is_itype='1') else
-  --   alu_ldst   when (is_load='1' or is_store='1' or is_jalr='1') else
-  --   alu_u      when (is_u_lui='1' or is_u_auipc='1') else
-  --   ALU_ADD;
+  
 
-  alu_op <= alu_r when is_rtype='1' else
-          alu_i when is_itype='1' else
+  -- alu_op <= alu_r when is_rtype='1' else
+  --         alu_i when is_itype='1' else
+  --         ALU_ADD;
+
+  alu_op <= alu_r   when is_rtype='1' else
+          alu_i   when is_itype='1' else
+          ALU_ADD when (is_load='1' or is_store='1' or is_jalr_op='1') else
+          ALU_SUB when is_branch_op='1' else   -- good default for beq/bne comparisons
           ALU_ADD;
 
 end architecture;

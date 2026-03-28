@@ -11,5 +11,9 @@ Register Write to Reg: 0x00 Val: 0x00000008
 In clock cycle: 5
 Register Write to Reg: 0x06 Val: 0x00000000
 In clock cycle: 6
+<<<<<<< HEAD
 Register Write to Reg: 0x06 Val: 0x00000011
+=======
+Register Write to Reg: 0x06 Val: 0x00000009
+>>>>>>> top-level-integration
 Execution is stopping! Clock Cycle: 7

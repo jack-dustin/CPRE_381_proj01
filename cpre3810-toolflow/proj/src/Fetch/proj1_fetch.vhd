@@ -27,6 +27,7 @@ architecture structural of proj1_fetch is
     signal os_busMux2     : std_logic_vector(31 downto 0);    -- Signal carries from busMux_2 to PC register
     signal s_PC_4_mux     : std_logic_vector(31 downto 0);    -- Signal carries "PC + 4" result to busMux(0)
     signal s_PC_imm_mux   : std_logic_vector(31 downto 0);    -- Signal carries "PC + imm" result to busMux(1)
+    signal s_CLK_n : std_logic;
 
     component basic_adder_n is 
         generic (N: integer := 4);      -- Defined 4 by default in basic_adder_n folder
@@ -57,6 +58,7 @@ architecture structural of proj1_fetch is
     -- (instantiate components)
     -- Component => Entity Ports/Signals
     begin   
+        --s_CLK_n <= not i_CLK;
 
         -- Choose between "PC + 4" and "PC + imm"
         INST_BUSMUX_1: busMux_2t1
