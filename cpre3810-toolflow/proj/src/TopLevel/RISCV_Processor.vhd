@@ -207,15 +207,7 @@ end component;
          c_funct3       : in  std_logic_vector(2  downto 0);    
          o_LoadOut      : out std_logic_vector(31 downto 0));
   end component;
-
-
-  component andg_6t3 is -- KEEP THIS. THIS IS FOR FORCING ALU to do adding (For Store, Load, and jal/r) -Isaiah
-    port(i_A    : in  std_logic_vector(2 downto 0);
-         i_B    : in  std_logic_vector(2 downto 0);
-         o_O    : out std_logic_vector(2 downto 0));
-  end component;
-
-
+  
 
 begin
   s_Ovfl <= '0'; -- RISC-V does not have hardware overflow detection.
