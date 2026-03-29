@@ -26,17 +26,17 @@ architecture structural of andg_6t3 is
 
 begin
 
-    INST_AND_1: andg2 is port(
+    INST_AND_1: andg2 port map(
         i_A =>  i_A(0),
         i_B =>  i_B(0),
         o_F =>  o_O(0));
 
-    INST_AND_2: andg2 is port(
+    INST_AND_2: andg2 port map(
         i_A =>  i_A(1),
         i_B =>  i_B(1),
         o_F =>  o_O(1));
 
-    INST_AND_2: andg2 is port(
+    INST_AND_3: andg2 port map(
         i_A =>  i_A(2),
         i_B =>  i_B(2),
         o_F =>  o_O(2));

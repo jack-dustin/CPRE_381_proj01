@@ -100,7 +100,7 @@ architecture structure of RISCV_Processor is
  -- ADD signal may/may not force ALU to add for instructions like store, load, jal, jalr
   -- Don't get rid of it! -Isaiah
    signal s_ALUctl    : std_logic_vector(3 downto 0);
-   signal s_ALUctlADD : std_logic_vector(3 downto 0); 
+   signal s_ALUctlFin : std_logic_vector(3 downto 0); 
 
  -- LUI control signal
    signal s_isLUI : std_logic;
@@ -358,17 +358,23 @@ s_RegWrData <= s_RegWrData_c;
   );
 
 
-  ALUCtrl: andg_6t3
-  port map(i_A  => s_ALUctl(3 downto 1), -- funct3 bits in "order"   *laughs and screams psychotically*
-           i_B  => (others => s_Inst(4)),  -- 3 bit input. Taking in 4th bit of opcode for all 3 bits
-           o_O  => s_ALUctlADD); -- 3 bit output
+  -- Assign new ALU funct 3 bits to [funct3 * (OpCode(4)]
+  -- Forces Adder/Sub output from ALU when not doing other ALU instructions
+      -- Yes, it is needed. For addressing (load/store), and (blt/bge/bltu/bgeu), and jal/jalr
+  s_ALUctlFin(3) <= s_ALUctl(3) and s_Inst(4);
+  s_ALUctlFin(2) <= s_ALUctl(2) and s_Inst(4);
+  s_ALUctlFin(1) <= s_ALUctl(1) and s_Inst(4);
+
+  -- Force Subtraction (or allow adding) for branching (blt) 
+  -- 
+  s_ALUctlFin(0) <= (s_ALUctl(0) and s_Inst(4)) or (s_Inst(6) and (not s_Inst(4)) and (not s_Inst(2)));
 
 
   ALU0: proj01_ALU
   port map(
     i_A     => s_Ors1, -- rs1
     i_B     => s_ALUIn2, -- output of ALU input mux
-    i_ALUctl => s_ALUctlADD, -- control signal from control decoder for ALU operation
+    i_ALUctl => s_ALUctlFin, -- control signal from control decoder for ALU operation
     o_ALUout    => s_ALUOut  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
   );
 
