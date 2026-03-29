@@ -360,16 +360,16 @@ s_RegWrData <= s_RegWrData_c;
   );
 
 
-  -- Assign new ALU funct 3 bits to [funct3 * (OpCode(4)]
+  -- Assign new ALU funct 3 bits to [funct3 * (B_ctrl || OpCode(4))]
   -- Forces Adder/Sub output from ALU when not doing other ALU instructions
       -- Yes, it is needed. For addressing (load/store), and (blt/bge/bltu/bgeu), and jal/jalr
-  s_ALUctlFin(3) <= s_ALUctl(3) and s_Inst(4);
-  s_ALUctlFin(2) <= s_ALUctl(2) and s_Inst(4);
-  s_ALUctlFin(1) <= s_ALUctl(1) and s_Inst(4);
+  s_ALUctlFin(3) <= s_ALUctl(3) and (s_Branch or s_Inst(4));
+  s_ALUctlFin(2) <= s_ALUctl(2) and (s_Branch or s_Inst(4));
+  s_ALUctlFin(1) <= s_ALUctl(1) and (s_Branch or s_Inst(4));
 
   -- Force Subtraction (or allow adding) for branching (blt) 
   -- 
-  s_ALUctlFin(0) <= (s_ALUctl(0) and s_Inst(4)) or (s_Inst(6) and (not s_Inst(4)) and (not s_Inst(2)));
+  s_ALUctlFin(0) <= (s_ALUctl(0) and s_Inst(4)) or s_Branch;
 
 
   ALU0: proj01_ALU
@@ -377,9 +377,8 @@ s_RegWrData <= s_RegWrData_c;
     i_A     => s_Ors1, -- rs1
     i_B     => s_ALUIn2, -- output of ALU input mux
     i_ALUctl => s_ALUctlFin, -- control signal from control decoder for ALU operation
-    o_ALUout    => s_ALUOut  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
-    o_branchOut => s_brTaken
-  );
+    o_ALUout    => s_ALUOut,  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
+    o_branchOut => s_brTaken);
 
 
 
