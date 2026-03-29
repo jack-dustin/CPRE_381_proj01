@@ -64,7 +64,7 @@ begin
   is_itype   <= '1' when opcode = OP_ITYPE  else '0';
   is_load    <= '1' when opcode = OP_LOAD   else '0';
   is_store   <= '1' when opcode = OP_STORE  else '0';
-  is_branch_op  <= '1' when opcode = OP_BRANCH else '0';
+  is_b       <= '1' when opcode = OP_BRANCH else '0';
 
   is_jal_op     <= '1' when opcode = OP_JAL    else '0';
   is_jalr_op    <= '1' when opcode = OP_JALR   else '0';
@@ -155,14 +155,13 @@ begin
 
   
 
-  -- alu_op <= alu_r when is_rtype='1' else
-  --         alu_i when is_itype='1' else
-  --         ALU_ADD;
+  is_branch <= is_b;
 
-  alu_op <= alu_r   when is_rtype='1' else
-          alu_i   when is_itype='1' else
-          ALU_ADD when (is_load='1' or is_store='1' or is_jalr_op='1') else
-          ALU_SUB when is_branch_op='1' else   -- good default for beq/bne comparisons
-          ALU_ADD;
+  alu_op <= alu_r when is_rtype='1' else
+          alu_i when is_itype='1' else
+          ALU_ADD when is_load ='1' else
+          ALU_SUB when is_b = '1' else
+          ALU_ADD
+          ;
 
 end architecture;
