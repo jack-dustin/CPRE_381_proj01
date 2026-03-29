@@ -1,7 +1,9 @@
 -------------------------------------------------------------------------
 -- Henry Duwe
+-- Jack Dustin
+-- Isaiah Pridie
 -- Department of Electrical and Computer Engineering
--- Iowa State University
+-- Iowa State University of Science and Technology
 -------------------------------------------------------------------------
 
 
@@ -95,7 +97,10 @@ architecture structure of RISCV_Processor is
   signal s_ALUIn2 : std_logic_vector(N-1 downto 0);
   
  -- ALU contrl signal
-   signal s_ALUctl : std_logic_vector(3 downto 0);
+ -- ADD signal may/may not force ALU to add for instructions like store, load, jal, jalr
+  -- Don't get rid of it! -Isaiah
+   signal s_ALUctl    : std_logic_vector(3 downto 0);
+   signal s_ALUctlADD : std_logic_vector(3 downto 0); 
 
  -- LUI control signal
    signal s_isLUI : std_logic;
@@ -202,6 +207,14 @@ end component;
          c_funct3       : in  std_logic_vector(2  downto 0);    
          o_LoadOut      : out std_logic_vector(31 downto 0));
   end component;
+
+
+  component andg_6t3 is -- KEEP THIS. THIS IS FOR FORCING ALU to do adding (For Store, Load, and jal/r) -Isaiah
+    port(i_A    : in  std_logic_vector(2 downto 0);
+         i_B    : in  std_logic_vector(2 downto 0);
+         o_O    : out std_logic_vector(2 downto 0));
+  end component;
+
 
 
 begin
@@ -345,11 +358,17 @@ s_RegWrData <= s_RegWrData_c;
   );
 
 
+  ALUCtrl: andg_6t3
+  port map(i_A  => s_ALUctl(3 downto 1), -- funct3 bits in "order"   *laughs and screams psychotically*
+           i_B  => (others => s_Inst(4)),  -- 3 bit input. Taking in 4th bit of opcode for all 3 bits
+           o_O  => s_ALUctlADD); -- 3 bit output
+
+
   ALU0: proj01_ALU
   port map(
     i_A     => s_Ors1, -- rs1
     i_B     => s_ALUIn2, -- output of ALU input mux
-    i_ALUctl => s_ALUctl, -- control signal from control decoder for ALU operation
+    i_ALUctl => s_ALUctlADD, -- control signal from control decoder for ALU operation
     o_ALUout    => s_ALUOut  -- TODO: connect this to the output of your ALU and to the oALUOut output port of the processor
   );
 
@@ -383,7 +402,7 @@ s_RegWrData <= s_RegWrData_c;
   LOAD0: proj01_LOAD
     port map(
       i_memVal    => s_DMemOut,
-      c_addr_2bit => s_ALUOut(1 downto 0),
+      c_addr_2bit => s_ALUOut(1 downto 0),  -- Need ALU out b/c immediate address offset
       c_funct3    => s_Inst(14 downto 12),
       o_LoadOut   => s_LoadOut
     ); -- connect to data input of regfile write data (and also to your ALU output mux if you have one for load instructions)
