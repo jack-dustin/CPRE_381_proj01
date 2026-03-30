@@ -106,6 +106,11 @@ architecture structure of RISCV_Processor is
    signal s_isLUI : std_logic;
    signal s_LoadOut : std_logic_vector(31 downto 0);
 
+
+-- AUIPC control signals
+  signal s_isAUIPC : std_logic;
+  signal s_AUIPCOut : std_logic_vector(N-1 downto 0);
+  
    
 
    signal s_RegWrAddr_c : std_logic_vector(4 downto 0);
@@ -161,6 +166,16 @@ end component;
           mem_sign  : out std_logic   -- for loads: 1=signed, 0=unsigned
         
   );
+  end component;
+
+  component addSub is
+    port(
+          i_A     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
+          i_B     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
+          i_Sub   : in std_logic; -- 1 for subtraction, 0 for addition
+          o_Out   : out std_logic_vector((DATA_WIDTH - 1) downto 0);
+          o_Ovfl  : out std_logic
+    );
   end component;
 
   component reg_file is
@@ -237,10 +252,12 @@ s_Halt <= '1' when (iRST='0' and iInstLD='0' and
           else '0';
 
 s_isLUI <= '1' when s_Inst(6 downto 0) = OP_LUI else '0';
+s_isAUIPC <= '1' when s_Inst(6 downto 0) = OP_AUIPC else '0';
 
 s_RegWrAddr_c <= s_Inst(11 downto 7);
-s_RegWrData_c <= s_Oext     when s_isLUI='1' else
-                s_LoadOut  when s_WBsel = WB_MEM else
+s_RegWrData_c <= s_Oext      when s_isLUI='1' else
+                s_AUIPCOut  when s_isAUIPC='1' else
+                s_LoadOut   when s_WBsel = WB_MEM else
                 s_ALUOut;
 s_RegWr_c     <= s_RegWr;
 
@@ -349,6 +366,25 @@ s_RegWrData <= s_RegWrData_c;
     i_instr => s_Inst,
     o_imm   => s_Oext
   );
+
+  AUIPC_ADD: entity work.addSub
+  generic map(N => N)
+  port map(
+    i_Da     => s_PC,
+    i_Db     => s_Oext,      -- imm_gen must output immU for AUIPC
+    nAdd_Sub => '0',         -- add
+    o_Sum    => s_AUIPCOut,
+    o_Car    => open
+  );
+
+  -- Mux_ALU_A: mux2t1_N
+  -- generic map(N => N)
+  -- port map(
+  --   i_D0 => s_Ors1,  -- normal ALU A = rs1
+  --   i_D1 => s_PC,    -- AUIPC ALU A = PC
+  --   i_S  => s_isAUIPC,
+  --   o_O  => s_ALUIn1
+  -- );
   
   Mux_ALUSrc: mux2t1_N
   generic map(N => N)

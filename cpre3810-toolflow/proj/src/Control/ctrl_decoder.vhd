@@ -35,7 +35,7 @@ architecture dataflow of ctrl_decoder is
   
 
   -- opcode class flags
-  signal is_rtype, is_itype, is_lui, is_load, is_store, is_b: std_logic; --, , , is_b, , is_u_auipc : std_logic;  
+  signal is_rtype, is_itype, is_lui, is_load, is_store, is_b, is_auipc: std_logic; --, , , is_b, , is_u_auipc : std_logic;  
 
   -- ALU op candidates
   signal alu_r : alu_op_t;
@@ -69,18 +69,18 @@ begin
 --  is_jalr_op    <= '1' when opcode = OP_JALR   else '0';
 
   is_lui   <= '1' when opcode = OP_LUI    else '0';
-  -- is_auipc <= '1' when opcode = OP_AUIPC  else '0';
+  is_auipc <= '1' when opcode = OP_AUIPC  else '0';
 
 
 --  reg_we  <= '1' when (is_rtype='1' or is_itype='1' or is_load='1' or is_jal_op='1' or is_jalr_op='1' or is_lui='1') -- or is_auipc
 --              else '0';
 
-  reg_we <= '1' when (is_rtype='1' or is_itype='1' or is_lui='1' or is_load='1') else '0';
+  reg_we <= '1' when (is_rtype='1' or is_itype='1' or is_lui='1' or is_load='1' or is_auipc='1') else '0';
 
 --  alu_src <= '1' when (is_itype='1'or is_load='1' or is_store='1' or is_jalr_op='1') -- or is_u_auipc='1')
 --             else '0';
 
-  alu_src <= '1' when (is_itype='1'or is_load='1' or is_store='1') --or is_jalr='1' or is_u_auipc='1')
+  alu_src <= '1' when (is_itype='1'or is_load='1' or is_store='1' or is_auipc='1') --or is_jalr='1' or is_u_auipc='1')
              else '0';
 
   mem_we  <= '1' when is_store='1' else '0';
