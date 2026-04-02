@@ -389,7 +389,6 @@ s_RegWrData <= s_Oext      when s_isLUI='1' else
   );
 
   AUIPC_ADD: addSub
-  generic map(N => N)
   port map(
     i_Da     => s_PC,
     i_Db     => s_Oext,      -- imm_gen must output immU for AUIPC
