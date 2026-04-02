@@ -175,13 +175,13 @@ end component;
   end component;
 
   component addSub is
-    port(
-          i_A     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
-          i_B     : in std_logic_vector((DATA_WIDTH - 1) downto 0);
-          i_Sub   : in std_logic; -- 1 for subtraction, 0 for addition
-          o_Out   : out std_logic_vector((DATA_WIDTH - 1) downto 0);
-          o_Ovfl  : out std_logic
-    );
+    generic (N : integer := 32);    -- use 32 for now. Value not specified in Lab Doc
+    port (  i_Da        :   in std_logic_vector(N-1 downto 0);
+            i_Db        :   in std_logic_vector(N-1 downto 0);
+            nAdd_Sub    :   in std_logic;   -- used as control/carry
+            o_Sum       :   out std_logic_vector(N-1 downto 0);
+            o_Car       :   out std_logic);  -- used for last carry output
+    
   end component;
 
   component reg_file is
@@ -391,12 +391,13 @@ s_RegWrData <= s_Oext      when s_isLUI='1' else
   AUIPC_ADD: addSub
   generic map(N => N)
   port map(
-    i_A     => s_PC,
-    i_B     => s_Oext,      -- imm_gen must output immU for AUIPC
-    i_Sub   => '0',         -- add
-    o_Out   => s_AUIPCOut,
-    o_Ovfl  => open
+    i_Da     => s_PC,
+    i_Db     => s_Oext,      -- imm_gen must output immU for AUIPC
+    nAdd_Sub   => '0',         -- add
+    o_Sum   => s_AUIPCOut,
+    o_Car  => open
   );
+  
   
 
   
