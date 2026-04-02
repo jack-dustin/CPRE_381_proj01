@@ -74,9 +74,6 @@ architecture structure of RISCV_Processor is
   signal s_jal          : std_logic;
   signal s_jalr         : std_logic;
 
-  -- mem_size for sw lw and varied sizes, signal
-  signal s_memsize      : std_logic_vector(N-1 downto 0);
-
   -- memory data signed or unsigned ctrl signal
   signal s_MemSign      : std_logic;
 
@@ -104,6 +101,8 @@ architecture structure of RISCV_Processor is
 
  -- LUI control signal
    signal s_isLUI : std_logic;
+
+-- load output after processing by load module (e.g., sign/zero extension, shifting for byte/halfword loads, etc.)
    signal s_LoadOut : std_logic_vector(31 downto 0);
 
 
@@ -119,6 +118,9 @@ architecture structure of RISCV_Processor is
 
    signal s_brTaken : std_logic;
    signal s_Fetchsrc : std_logic;
+   signal s_PC4 : std_logic_vector(N-1 downto 0);
+
+   signal s_JalrTarget : std_logic_vector(N-1 downto 0);
 
 
    
@@ -141,7 +143,9 @@ architecture structure of RISCV_Processor is
     i_CLK    : in  std_logic;
     i_RST_PC : in  std_logic;
     i_imm    : in  std_logic_vector(31 downto 0);
-    c_PC_add : in  std_logic;
+    --c_PC_add : in  std_logic;
+    c_PC_sel : in  std_logic_vector(1 downto 0);
+    o_PC4    : out std_logic_vector(31 downto 0);
     o_PC     : out std_logic_vector(31 downto 0)
   );
 end component;
@@ -161,7 +165,8 @@ end component;
           is_branch : out std_logic;
           is_jal    : out std_logic;
           is_jalr   : out std_logic;
-
+          is_lui     : out std_logic;
+          is_auipc   : out std_logic;
           alu_op    : out alu_op_t;
           mem_sign  : out std_logic   -- for loads: 1=signed, 0=unsigned
         
@@ -238,31 +243,26 @@ begin
   s_Ovfl <= '0'; -- RISC-V does not have hardware overflow detection.
  
   oALUOut     <= s_ALUOut;             -- drive top-level output
-  -- ===== ADD/ADDI bring-up: tie off unused data memory inputs =====
+
    s_DMemAddr <= s_ALUOut;   -- effective address from ALU
    s_DMemData <= s_Ors2;     -- store data from rs2
- -- WFI detect: opcode=1110011, funct3=000, imm12=0x105
--- Only treat it as HALT when we're EXECUTING (not loading IMem, not in reset)
+ 
 -- WFI detect (SYSTEM opcode 1110011, funct3=000, imm12=0x105)
--- Also block halting at the reset PC value so we don't stop immediately after reset_done
+
 s_Halt <= '1' when (iRST='0' and iInstLD='0' and
                     s_Inst(6 downto 0)    = "1110011" and
                     s_Inst(14 downto 12) = "000"     and
                     s_Inst(31 downto 20) = x"105")
           else '0';
 
-s_isLUI <= '1' when s_Inst(6 downto 0) = OP_LUI else '0';
-s_isAUIPC <= '1' when s_Inst(6 downto 0) = OP_AUIPC else '0';
 
-s_RegWrAddr_c <= s_Inst(11 downto 7);
-s_RegWrData_c <= s_Oext      when s_isLUI='1' else
+s_RegWrAddr <= s_Inst(11 downto 7);
+s_RegWrData <= s_Oext      when s_isLUI='1' else
                 s_AUIPCOut  when s_isAUIPC='1' else
+                s_PC4        when s_WBsel = WB_PC4 else
                 s_LoadOut   when s_WBsel = WB_MEM else
                 s_ALUOut;
-s_RegWr_c     <= s_RegWr;
 
-s_RegWrAddr <= s_RegWrAddr_c;
-s_RegWrData <= s_RegWrData_c;
 
 
 
@@ -292,6 +292,23 @@ s_RegWrData <= s_RegWrData_c;
   s_ALUctl(0) <= s_Inst(30) when (s_Inst(6 downto 0)=OP_RTYPE) or
                               (s_Inst(6 downto 0)=OP_ITYPE and s_Inst(14 downto 12)="101")
                 else '0';
+
+   -- Assign new ALU funct 3 bits to [funct3 * (B_ctrl || OpCode(4))]
+  -- Forces Adder/Sub output from ALU when not doing other ALU instructions
+      -- Yes, it is needed. For addressing (load/store), and (blt/bge/bltu/bgeu), and jal/jalr
+  s_ALUctlFin(3) <= s_ALUctl(3) and (s_Branch or s_Inst(4));
+  s_ALUctlFin(2) <= s_ALUctl(2) and (s_Branch or s_Inst(4));
+  s_ALUctlFin(1) <= s_ALUctl(1) and (s_Branch or s_Inst(4));
+
+  -- Force Subtraction (or allow adding) for branching (blt) 
+  -- 
+  s_ALUctlFin(0) <= (s_ALUctl(0) and s_Inst(4)) or s_Branch;
+
+  
+  s_JalrTarget <= s_ALUOut(31 downto 1) & '0'; -- For jalr, target is rs1+imm (also output of ALU with correct control signals)
+
+  s_Fetchsrc(1) <= s_jalr;
+  s_Fetchsrc(0) <= s_jal or s_jalr or (s_Branch and s_brTaken);
     
   -- TODO: This is required to be your final input to your instruction memory. This provides a feasible method to externally load the memory module which means that the synthesis tool must assume it knows nothing about the values stored in the instruction memory. If this is not included, much, if not all of the design is optimized out because the synthesis tool will believe the memory to be all zeros.
   with iInstLd select
@@ -326,10 +343,11 @@ s_RegWrData <= s_RegWrData_c;
   port map(
     i_CLK    => iCLK,
     i_RST_PC => iRST,
-    i_imm    => s_Oext,   -- from your extenders output (sign-extended imm)
-    c_PC_add => s_Fetchsrc,      -- for now: always PC+4
-    o_PC     => s_PC
-  );
+    i_imm    => s_Oext,
+    i_alu    => s_JalrTarget,
+    c_PC_sel => s_Fetchsrc,
+    o_PC     => s_PC,
+    o_PC4    => s_PC4);
   CDec: ctrl_decoder
     generic map(ADDR_WIDTH => ADDR_WIDTH,
                 DATA_WIDTH => N)
@@ -343,8 +361,9 @@ s_RegWrData <= s_RegWrData_c;
               is_branch => s_Branch,
               is_jal    => s_jal,
               is_jalr   => s_jalr,
+              is_lui    => s_isLUI,
+              is_auipc  => s_isAUIPC,
               alu_op    => s_ALUop,
-              mem_sign  => s_MemSign
               -- mem_size  => s_memsize
              );
   Rfile: reg_file
@@ -377,14 +396,7 @@ s_RegWrData <= s_RegWrData_c;
     o_Car    => open
   );
 
-  -- Mux_ALU_A: mux2t1_N
-  -- generic map(N => N)
-  -- port map(
-  --   i_D0 => s_Ors1,  -- normal ALU A = rs1
-  --   i_D1 => s_PC,    -- AUIPC ALU A = PC
-  --   i_S  => s_isAUIPC,
-  --   o_O  => s_ALUIn1
-  -- );
+  
   
   Mux_ALUSrc: mux2t1_N
   generic map(N => N)
@@ -396,16 +408,7 @@ s_RegWrData <= s_RegWrData_c;
   );
 
 
-  -- Assign new ALU funct 3 bits to [funct3 * (B_ctrl || OpCode(4))]
-  -- Forces Adder/Sub output from ALU when not doing other ALU instructions
-      -- Yes, it is needed. For addressing (load/store), and (blt/bge/bltu/bgeu), and jal/jalr
-  s_ALUctlFin(3) <= s_ALUctl(3) and (s_Branch or s_Inst(4));
-  s_ALUctlFin(2) <= s_ALUctl(2) and (s_Branch or s_Inst(4));
-  s_ALUctlFin(1) <= s_ALUctl(1) and (s_Branch or s_Inst(4));
-
-  -- Force Subtraction (or allow adding) for branching (blt) 
-  -- 
-  s_ALUctlFin(0) <= (s_ALUctl(0) and s_Inst(4)) or s_Branch;
+ 
 
 
   ALU0: proj01_ALU
@@ -418,11 +421,11 @@ s_RegWrData <= s_RegWrData_c;
 
 
 
-  AND0: andg2
-    port map (
-      i_A  => s_Branch,
-      i_B  => s_brTaken,
-      o_F  => s_Fetchsrc);
+  -- AND0: andg2
+  --   port map (
+  --     i_A  => s_Branch,
+  --     i_B  => s_brTaken,
+  --     o_F  => s_Fetchsrc);
 
 -- implement load functionality
 
