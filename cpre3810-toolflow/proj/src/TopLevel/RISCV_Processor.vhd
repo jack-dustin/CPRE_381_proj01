@@ -117,7 +117,7 @@ architecture structure of RISCV_Processor is
    signal s_RegWr_c     : std_logic;
 
    signal s_brTaken : std_logic;
-   signal s_Fetchsrc : std_logic;
+   signal s_Fetchsrc : std_logic_vector(1 downto 0); -- for PC Muxes: 00=PC+4, 01=PC+imm, 10=jalr target, 11=default to PC+4 (for now)
    signal s_PC4 : std_logic_vector(N-1 downto 0);
 
    signal s_JalrTarget : std_logic_vector(N-1 downto 0);
@@ -144,6 +144,7 @@ architecture structure of RISCV_Processor is
     i_RST_PC : in  std_logic;
     i_imm    : in  std_logic_vector(31 downto 0);
     --c_PC_add : in  std_logic;
+    i_alu      : in  std_logic_vector(31 downto 0);
     c_PC_sel : in  std_logic_vector(1 downto 0);
     o_PC4    : out std_logic_vector(31 downto 0);
     o_PC     : out std_logic_vector(31 downto 0)
@@ -363,9 +364,10 @@ s_RegWrData <= s_Oext      when s_isLUI='1' else
               is_jalr   => s_jalr,
               is_lui    => s_isLUI,
               is_auipc  => s_isAUIPC,
-              alu_op    => s_ALUop,
+              alu_op    => s_ALUop
               -- mem_size  => s_memsize
              );
+
   Rfile: reg_file
     
     port map(
@@ -386,15 +388,16 @@ s_RegWrData <= s_Oext      when s_isLUI='1' else
     o_imm   => s_Oext
   );
 
-  AUIPC_ADD: entity work.addSub
+  AUIPC_ADD: addSub
   generic map(N => N)
   port map(
-    i_Da     => s_PC,
-    i_Db     => s_Oext,      -- imm_gen must output immU for AUIPC
-    nAdd_Sub => '0',         -- add
-    o_Sum    => s_AUIPCOut,
-    o_Car    => open
+    i_A     => s_PC,
+    i_B     => s_Oext,      -- imm_gen must output immU for AUIPC
+    i_Sub   => '0',         -- add
+    o_Out   => s_AUIPCOut,
+    o_Ovfl  => open
   );
+  
 
   
   
