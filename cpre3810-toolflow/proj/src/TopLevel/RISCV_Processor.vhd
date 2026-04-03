@@ -110,11 +110,6 @@ architecture structure of RISCV_Processor is
   signal s_isAUIPC : std_logic;
   signal s_AUIPCOut : std_logic_vector(N-1 downto 0);
   
-   
-
-   signal s_RegWrAddr_c : std_logic_vector(4 downto 0);
-   signal s_RegWrData_c : std_logic_vector(N-1 downto 0);
-   signal s_RegWr_c     : std_logic;
 
    signal s_brTaken : std_logic;
    signal s_Fetchsrc : std_logic_vector(1 downto 0); -- for PC Muxes: 00=PC+4, 01=PC+imm, 10=jalr target, 11=default to PC+4 (for now)
@@ -349,6 +344,8 @@ s_RegWrData <= s_Oext      when s_isLUI='1' else
     c_PC_sel => s_Fetchsrc,
     o_PC     => s_PC,
     o_PC4    => s_PC4);
+
+    
   CDec: ctrl_decoder
     generic map(ADDR_WIDTH => ADDR_WIDTH,
                 DATA_WIDTH => N)
@@ -375,11 +372,11 @@ s_RegWrData <= s_Oext      when s_isLUI='1' else
               i_RS2   => s_Inst(24 downto 20),
               o_rs1   => s_Ors1,
               o_rs2   => s_Ors2,
-              i_rd    => s_RegWrAddr_c, -- s_Inst(11 downto 7)
+              i_rd    => s_RegWrAddr, -- s_Inst(11 downto 7)
               i_dEN   => s_RegWr,
               i_RST   => iRST,
               i_CLK   => iCLK,
-              i_DATA  => s_RegWrData_c
+              i_DATA  => s_RegWrData
              );
   
   Imm0: imm_gen

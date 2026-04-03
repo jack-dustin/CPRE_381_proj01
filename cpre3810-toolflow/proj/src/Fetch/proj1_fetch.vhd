@@ -72,20 +72,20 @@ architecture structural of proj1_fetch is
         o_PC  <= is_PC;
         o_PC4 <= s_PC_4_mux; -- Output "PC + 4" for use in jal instructions (to be stored in rd)
 
-        -- Choose between "jalr target address or imm" and "PC + imm"
+                -- First mux: choose between PC+4 and PC+imm
         INST_BUSMUX_1: busMux_2t1
-        port map(i_dZero    => i_alu,        -- Input 0
-                 i_dOne     => s_PC_imm_mux,      -- Input 1
-                 ALUSrc     => c_PC_sel(1),          -- Control/Select line
-                 o_dOUT     => os_busMux1);       -- Going to PC Register
+        port map(i_dZero    => s_PC_4_mux,
+                 i_dOne     => s_PC_imm_mux,
+                 ALUSrc     => c_PC_sel(0),
+                 o_dOUT     => os_busMux1);
 
-        -- Choose between "jalr target address" and "PC + 4"
+        -- Second mux: choose between previous result and jalr target
         INST_BUSMUX_2: busMux_2t1
-        port map(i_dZero    => s_PC_4_mux,      -- Default value through (busMux_1 output)
-                 i_dOne     => os_busMux1,     -- Reset PC Register to default value
-                 ALUSrc     => c_PC_sel(0),        -- Reset signal/select line for PC register
-                 o_dOUT     => os_busMux2);     -- Output final result to PC Register
-
+        port map(i_dZero    => os_busMux1,
+                 i_dOne     => i_alu,
+                 ALUSrc     => c_PC_sel(1),
+                 o_dOUT     => os_busMux2);
+                 
         -- Reset override: force 0x00400000 on reset
         INST_BUSMUX_3: busMux_2t1
         port map(i_dZero    => os_busMux2,
