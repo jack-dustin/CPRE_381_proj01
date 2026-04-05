@@ -20,20 +20,22 @@ architecture dataflow of imm_gen is
 begin
   opcode <= i_instr(6 downto 0);
 
-  -- I-type immediate: instr[31:20], sign-extend
+  -- I-type immediate: instr[31:20], sign-extend bit 31 to 31:20 then concatenate with instr[31:20]
   imm_i <= (31 downto 12 => i_instr(31)) & i_instr(31 downto 20);
 
-  -- S-type immediate: instr[31:25] & instr[11:7], sign-extend
+  -- S-type immediate: instr[31:25] & instr[11:7], sign-extend and concatenate with correct bit positions
   imm_s <= (31 downto 12 => i_instr(31)) & i_instr(31 downto 25) & i_instr(11 downto 7);
 
-  -- U-type immediate: instr[31:12] << 12
+  -- U-type immediate: instr[31:12] << 12, value already aligned, just concatenate with 12 zeros
   imm_u <= i_instr(31 downto 12) & x"000";
 
   -- B-type immediate: {instr[31], instr[7], instr[30:25], instr[11:8], 0} << 1, sign-extend
+  -- align bits to correct positions and concatenate with sign bit and 0 at the end
   imm_b <= (31 downto 13 => i_instr(31)) &
            i_instr(31) & i_instr(7) & i_instr(30 downto 25) & i_instr(11 downto 8) & '0';
 
   -- J-type immediate: {instr[31], instr[19:12], instr[20], instr[30:21], 0} << 1, sign-extend
+  -- align bits to correct positions and concatenate with sign bit and 0 at the end
   imm_j <= (31 downto 21 => i_instr(31)) &
            i_instr(31) & i_instr(19 downto 12) & i_instr(20) & i_instr(30 downto 21) & '0';
 

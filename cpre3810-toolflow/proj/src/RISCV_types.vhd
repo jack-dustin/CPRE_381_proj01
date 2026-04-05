@@ -59,6 +59,7 @@ end package RISCV_types;
 
 package body RISCV_types is
   -- Probably won't need anything here... function bodies, etc.
+  -- calculte and return the 2-bit control signal for the given writeback select
   function wb_sel_to_slv2(x : wb_sel_t) return std_logic_vector is
     variable y : std_logic_vector(1 downto 0);
   begin

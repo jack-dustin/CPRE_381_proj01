@@ -78,8 +78,11 @@ architecture structural of proj1_fetch is
                  i_dOne     => s_PC_imm_mux,
                  ALUSrc     => c_PC_sel(0),
                  o_dOUT     => os_busMux1);
-
+                 
         -- Second mux: choose between previous result and jalr target
+        -- Note: c_PC_sel(1) should only be 1 for jalr instructions, 
+        -- so this mux will only select the ALU output for jalr, 
+        -- and will select between PC+4 and PC+imm for all other instructions (including branches)
         INST_BUSMUX_2: busMux_2t1
         port map(i_dZero    => os_busMux1,
                  i_dOne     => i_alu,
