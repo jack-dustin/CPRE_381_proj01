@@ -5,7 +5,8 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
-use work.mux_32t1_package.all; -- import package from word folder
+use work.RISCV_types.all;
+--use work.mux_32t1_package.all; -- import package from word folder
 
 entity reg_file is 
   port(

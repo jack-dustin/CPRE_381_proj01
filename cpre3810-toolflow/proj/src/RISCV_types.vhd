@@ -18,9 +18,7 @@ package RISCV_types is
   constant DATA_WIDTH : integer := 32;
   constant ADDR_WIDTH : integer := 10;
 
-  -- ---- Opcode constants ----
-  -- Used by ctrl_decoder and imm_gen to classify instructions.
-  -- Values are the standard RISC-V base ISA opcode field (instr[6:0]).
+  -- Op codes
   constant OP_RTYPE  : std_logic_vector(6 downto 0) := "0110011";
   constant OP_ITYPE  : std_logic_vector(6 downto 0) := "0010011";
   constant OP_LOAD   : std_logic_vector(6 downto 0) := "0000011";
@@ -31,15 +29,13 @@ package RISCV_types is
   constant OP_LUI    : std_logic_vector(6 downto 0) := "0110111";
   constant OP_AUIPC  : std_logic_vector(6 downto 0) := "0010111";
 
-  -- ---- Write-back source select ----
-  -- Enumeration used as the wb_sel port type in ctrl_decoder and as
-  -- the s_WBsel signal in RISCV_Processor.
+  -- REGFile mux
+  type i_reg_array is array (31 downto 0) of std_logic_vector(31 downto 0);
+
+  -- WB types
   --   WB_ALU : rd <- ALU result        (R-type, I-type arithmetic)
   --   WB_MEM : rd <- DMEM load data    (load instructions)
   --   WB_PC4 : rd <- PC+4              (JAL, JALR return address)
   type wb_sel_t is (WB_ALU, WB_MEM, WB_PC4);
 
 end package RISCV_types;
-
-package body RISCV_types is
-end package body RISCV_types;
