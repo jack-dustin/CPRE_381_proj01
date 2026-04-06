@@ -14,16 +14,13 @@ use IEEE.std_logic_1164.all;
 
 package RISCV_types is
 
-  -- Example Constants. Declare more as needed
+  -- ---- Datapath widths ----
   constant DATA_WIDTH : integer := 32;
   constant ADDR_WIDTH : integer := 10;
 
-  -- Example record type. Declare whatever types you need here
-  type control_t is record
-    reg_wr : std_logic;
-    reg_to_mem : std_logic;
-  end record control_t;
-
+  -- ---- Opcode constants ----
+  -- Used by ctrl_decoder and imm_gen to classify instructions.
+  -- Values are the standard RISC-V base ISA opcode field (instr[6:0]).
   constant OP_RTYPE  : std_logic_vector(6 downto 0) := "0110011";
   constant OP_ITYPE  : std_logic_vector(6 downto 0) := "0010011";
   constant OP_LOAD   : std_logic_vector(6 downto 0) := "0000011";
@@ -34,40 +31,15 @@ package RISCV_types is
   constant OP_LUI    : std_logic_vector(6 downto 0) := "0110111";
   constant OP_AUIPC  : std_logic_vector(6 downto 0) := "0010111";
 
-  
-
-  subtype ALU_CTL is std_logic_vector(3 downto 0);
-
-  constant ALU_ADD  : ALU_CTL := "0000";
-  constant ALU_SUB  : ALU_CTL := "0001";
-  constant ALU_AND  : ALU_CTL := "0010";
-  constant ALU_OR   : ALU_CTL := "0011";
-  constant ALU_XOR  : ALU_CTL := "0100";
-  constant ALU_SLL  : ALU_CTL := "0101";
-  constant ALU_SRL  : ALU_CTL := "0110";
-  constant ALU_SRA  : ALU_CTL := "0111";
-  constant ALU_SLT  : ALU_CTL := "1000";
-  constant ALU_SLTU : ALU_CTL := "1001";
-  subtype alu_op_t is ALU_CTL;
+  -- ---- Write-back source select ----
+  -- Enumeration used as the wb_sel port type in ctrl_decoder and as
+  -- the s_WBsel signal in RISCV_Processor.
+  --   WB_ALU : rd <- ALU result        (R-type, I-type arithmetic)
+  --   WB_MEM : rd <- DMEM load data    (load instructions)
+  --   WB_PC4 : rd <- PC+4              (JAL, JALR return address)
   type wb_sel_t is (WB_ALU, WB_MEM, WB_PC4);
-
-  type mem_size_t is (MS_B, MS_H, MS_W);
-
-  function wb_sel_to_slv2(x : wb_sel_t) return std_logic_vector;
 
 end package RISCV_types;
 
 package body RISCV_types is
-  -- Probably won't need anything here... function bodies, etc.
-  -- calculte and return the 2-bit control signal for the given writeback select
-  function wb_sel_to_slv2(x : wb_sel_t) return std_logic_vector is
-    variable y : std_logic_vector(1 downto 0);
-  begin
-    case x is
-      when WB_ALU => y := "00";
-      when WB_MEM => y := "01";
-      when others => y := "10"; -- WB_PC4
-    end case;
-    return y;
-  end function;
 end package body RISCV_types;
