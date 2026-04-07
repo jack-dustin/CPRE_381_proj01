@@ -7,7 +7,8 @@ use IEEE.std_logic_1164.all;
 -- 2d vector array wants to be a gay little greedy bitch
     -- it's gotta have it's OWN FILE because it's OH-SO speacial
     -- it's gotta waste 45 min. of your time trying to find a stupid syntax error
-use work.mux_32t1_package.all; -- import package from word folder
+--use work.mux_32t1_package.all; -- import package from word folder
+use work.RISCV_types.all;
 
 entity mux_32t1 is
     port ( i_Sel  : in std_logic_vector(4 downto 0);    -- 5 total select bits
