@@ -6,27 +6,33 @@
 # a1 used for num elements in (current) chunck
 # a2 used for last element address of chunck
 
+# To change Number of Elements, Change:
+	# Number of physical elements in .word line
+	# The reserved space in .space __ for how many bytes you need
+	# Under main: addi a1, x0, __ where __ is the number of elements desired
+
 .data
 arr:
-    .word 20, 31, 5, 100, 15, 80, 92, 73, 50, 62, 12, 29, 
+    .word 31, 5, 100, 92, 73, 50
 end_arr:
-
-
+temp:
+    .space 24          # 6 words * 4 bytes
+  
 .text
 .global main
 
 main:
 lui  a0, 0x10010    # start of data/arr
-addi a1, x0, 12     # 12 elements
-slli a2, a1, 2      # 12 * 4 gets 48 bytes of data
+addi a1, x0, 6     # 12 elements
+slli a2, a1, 2      # 6 * 4 gets 24 bytes of data
+add  s11, a2, x0    # s11 now holds number of bytes declared
 add  a2, a0, a2     # a2 = Address of last element + 1
 addi a2, a2, -4     # a2 = Address of last element
-
-
+lui  sp, 0x80000
+addi sp, sp, -4
 jal  x1, MergeSortRecurse   # Calls MergeSortRecurse. Returns value to register x1 (aka ra)
-
-EXIT:
-    wfi
+beq  x0, x0 EXIT	# Unconditional jump to EXIT (wfi at end of file)
+	# Even with wfi, code will keep running if wfi is not the last line of the file
 
 MergeSortRecurse: 
     # if left address >= right address, return/end
@@ -85,22 +91,109 @@ MergeSortRecurse:
     # No branch - fall through to Merge
 
 Merge:
-    # Merge recieves a sorted left half and right half. 
-      # Merge still needs to compare the elements of the two arrays and grab the lower element. 
-      # Store the result in a temporary space in memory
-      # After sorting, copy and paste back into original chunk
-        # Think of the "original chunk" as the left addresses concatenated with the right side
-          # Visual: [ Left Side | Right Side ] --> [1, 2, 3, | 4, 5, 6,]
+    # Inputs at entry:
+    # LEFT  half: first=a0, size=a4, last=a7
+    # RIGHT half: first=a6, size=t0, last=a2
+    #
+    # Uses temp[] as merge buffer, then copies back into original chunk.
 
-    # LEFT HALF:
-        # First Address = a0    
-        # Size = a4
-        # Last Address = a7     
-    # RIGHT HALF:
-        # First Address = a6
-        # Size = t0
-        # Last Address = a2
+    add  t1, a0, x0          # t1 = left ptr
+    add  t2, a6, x0          # t2 = right ptr
+    add  t4, a7, x0          # t4 = left end
+    add  t5, a2, x0          # t5 = right end
 
-    # Logic to actually sort
+    # lui  t6, %hi(temp)
+    # addi t6, t6, %lo(temp)   # t6 = temp base
+    lui  t6, 0x10010
+    add  t6, t6, s11
+    
+    add  t3, t6, x0          # t3 = temp write ptr
 
-    jalr x0, 0(ra)  # Canonical format of ret 
+MergeLoopCheck:
+    # if left exhausted, copy remaining right
+    bltu t4, t1, CopyRightRemainder
+
+    # if right exhausted, copy remaining left
+    bltu t5, t2, CopyLeftRemainder
+
+    # load current left/right values
+    lw   a3, 0(t1)           # a3 = *left
+    lw   a5, 0(t2)           # a5 = *right
+
+    # if right < left, take right; else take left
+    blt  a5, a3, TakeRight
+
+TakeLeft:
+    sw   a3, 0(t3)
+    addi t1, t1, 4
+    addi t3, t3, 4
+    beq  x0, x0, MergeLoopCheck
+
+TakeRight:
+    sw   a5, 0(t3)
+    addi t2, t2, 4
+    addi t3, t3, 4
+    beq  x0, x0, MergeLoopCheck
+
+
+CopyLeftRemainder:
+    bltu t4, t1, CopyBackStart
+CopyLeftLoop:
+    lw   a3, 0(t1)
+    sw   a3, 0(t3)
+    addi t1, t1, 4
+    addi t3, t3, 4
+    bgeu t4, t1, CopyLeftLoop
+    beq  x0, x0, CopyBackStart
+
+
+CopyRightRemainder:
+    bltu t5, t2, CopyBackStart
+CopyRightLoop:
+    lw   a5, 0(t2)
+    sw   a5, 0(t3)
+    addi t2, t2, 4
+    addi t3, t3, 4
+    bgeu t5, t2, CopyRightLoop
+
+
+CopyBackStart:
+    # lui  t6, %hi(temp)
+    # addi t6, t6, %lo(temp)   # t6 = temp read ptr
+    lui  t6, 0x10010
+    add  t6, t6, s11
+    
+
+    add  t1, a0, x0          # t1 = original chunk write ptr
+    add  t2, a1, x0          # t2 = number of elements to copy back
+
+CopyBackLoop:
+    beq  t2, x0, MergeDone
+    lw   a3, 0(t6)
+    sw   a3, 0(t1)
+    addi t6, t6, 4
+    addi t1, t1, 4
+    addi t2, t2, -1
+    beq  x0, x0, CopyBackLoop
+
+
+MergeDone:
+    # Temporary fix to see if this fixes the program
+    # wfi		# end program
+    jalr x0, 0(ra)
+
+
+EXIT:
+    wfi
+    
+    # DEBUGGING
+    #addi t5, x0, 10
+    #add  t6, x0, x0		# clear t6
+    
+    # Loop in here 10 times, then exit
+    #LOOP_EXIT:
+    #addi t6, t6, 1		# increment by 1
+    #addi x0, x0, 0		# nop
+    #bne t6, t5, LOOP_EXIT	
+
+    #beq  x0, x0, EXIT		# remain inside exit loop
