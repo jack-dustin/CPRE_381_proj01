@@ -14,8 +14,11 @@ entity proj1_fetch is
     port(i_CLK      : in std_logic;
          i_RST_PC   : in std_logic;     -- Need different reset* (this one); We need to reset register to 0x0040.0000 not 0x0000.0000
          i_imm      : in std_logic_vector(31 downto 0);     -- imm AFTER SIGN-EXTENDING AND MUXING
-         c_PC_add   : in std_logic;                         -- Control bit for choosing between "+4" and "+imm"
-         o_PC       : out std_logic_vector(31 downto 0) );  -- Output from PC register to Instruction memory
+         i_alu      : in std_logic_vector(31 downto 0); -- jal target address from ALU (for jalr)
+         --c_PC_add   : in std_logic;                         -- Control bit for choosing between "+4" and "+imm"
+         c_PC_sel   : in std_logic_vector(1 downto 0); -- Control bits for choosing between "+4", "+imm", and "jalr target address" 00 = +4, 01 = +imm, 10 = jalr target address
+         o_PC       : out std_logic_vector(31 downto 0);  -- Output from PC register to Instruction memory
+         o_PC4      : out std_logic_vector(31 downto 0) );  -- Output of "PC + 4" for use in jal instructions (to be stored in rd)
 end proj1_fetch;
 
 architecture structural of proj1_fetch is 
@@ -25,8 +28,16 @@ architecture structural of proj1_fetch is
     signal is_PC          : std_logic_vector(31 downto 0);    -- Carries PC contents to adders
     signal os_busMux1     : std_logic_vector(31 downto 0);    -- Signal carries from busMux_1 to busMux_2
     signal os_busMux2     : std_logic_vector(31 downto 0);    -- Signal carries from busMux_2 to PC register
+    signal os_busMux3     : std_logic_vector(31 downto 0);    -- Signal carries from busMux_3 to busMux_1 (for jalr)
     signal s_PC_4_mux     : std_logic_vector(31 downto 0);    -- Signal carries "PC + 4" result to busMux(0)
     signal s_PC_imm_mux   : std_logic_vector(31 downto 0);    -- Signal carries "PC + imm" result to busMux(1)
+    signal s_CLK_n : std_logic;
+
+        -- 3-way select signals: first pick between PC+imm and ALU, then between PC+4 and the result of the first mux
+    signal s_jalr_or_branch : std_logic_vector(31 downto 0);  -- result of inner mux
+    signal s_next_pc        : std_logic_vector(31 downto 0);  -- result of outer mux (pre-reset)
+    signal s_next_pc_rst    : std_logic_vector(31 downto 0);  -- after reset override
+ 
 
     component basic_adder_n is 
         generic (N: integer := 4);      -- Defined 4 by default in basic_adder_n folder
@@ -57,25 +68,39 @@ architecture structural of proj1_fetch is
     -- (instantiate components)
     -- Component => Entity Ports/Signals
     begin   
+        --s_CLK_n <= not i_CLK;
+        o_PC  <= is_PC;
+        o_PC4 <= s_PC_4_mux; -- Output "PC + 4" for use in jal instructions (to be stored in rd)
 
-        -- Choose between "PC + 4" and "PC + imm"
+                -- First mux: choose between PC+4 and PC+imm
         INST_BUSMUX_1: busMux_2t1
-        port map(i_dZero    => s_PC_4_mux,        -- Input 0
-                 i_dOne     => s_PC_imm_mux,      -- Input 1
-                 ALUSrc     => c_PC_add,          -- Control/Select line
-                 o_dOUT     => os_busMux1);       -- Going to PC Register
-
+        port map(i_dZero    => s_PC_4_mux,
+                 i_dOne     => s_PC_imm_mux,
+                 ALUSrc     => c_PC_sel(0),
+                 o_dOUT     => os_busMux1);
+                 
+        -- Second mux: choose between previous result and jalr target
+        -- Note: c_PC_sel(1) should only be 1 for jalr instructions, 
+        -- so this mux will only select the ALU output for jalr, 
+        -- and will select between PC+4 and PC+imm for all other instructions (including branches)
         INST_BUSMUX_2: busMux_2t1
-        port map(i_dZero    => os_busMux1,      -- Default value through (busMux_1 output)
-                 i_dOne     => x"00400000",     -- Reset PC Register to default value
-                 ALUSrc     => i_RST_PC,        -- Reset signal/select line for PC register
-                 o_dOUT     => os_busMux2);     -- Output final result to PC Register
+        port map(i_dZero    => os_busMux1,
+                 i_dOne     => i_alu,
+                 ALUSrc     => c_PC_sel(1),
+                 o_dOUT     => os_busMux2);
+                 
+        -- Reset override: force 0x00400000 on reset
+        INST_BUSMUX_3: busMux_2t1
+        port map(i_dZero    => os_busMux2,
+                 i_dOne     => x"00400000",
+                 ALUSrc     => i_RST_PC,
+                 o_dOUT     => os_busMux3);
 
         INST_REG_N: reg_n
         port map(i_CLK  => i_CLK,
                  i_RST  => '0',             -- Prevent register from going to 0x0000.0000 
                  i_WE   => '1',             -- Should always be 1
-                 i_D    => os_busMux2,      -- Input from busMux
+                 i_D    => os_busMux3,      -- Input from busMux
                  o_Q    => is_PC);          -- Output of PC register (address going to instruction memory)
 
         o_PC    <= is_PC;   -- Assign output with the output signal
